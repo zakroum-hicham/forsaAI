@@ -68,12 +68,12 @@ const ForsaAILanding = () => {
                 <a href="#testimonials" className="text-slate-600 hover:text-slate-900 transition-colors">Témoignages</a>
                 <a href="#contact" className="text-slate-600 hover:text-slate-900 transition-colors">Contact</a>
                 <div className="flex flex-col space-y-2 pt-4 border-t border-slate-200">
-                  <button className="text-left text-slate-600 hover:text-slate-900 transition-colors">
+                  <Link href="/login" className="text-left text-slate-600 hover:text-slate-900 transition-colors">
                     Connexion
-                  </button>
-                  <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-left">
+                  </Link>
+                  <Link href="/register" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-left">
                     Essai gratuit
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -102,14 +102,14 @@ const ForsaAILanding = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
+                <Link href="/register" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold flex items-center justify-center hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-lg">
                   Démarrer gratuitement
                   <ArrowRight className="w-5 h-5 ml-2" />
-                </button>
-                <button className="border-2 border-slate-300 text-slate-700 px-8 py-4 rounded-lg font-semibold flex items-center justify-center hover:border-slate-400 transition-all">
+                </Link>
+                <Link href="/demo" className="border-2 border-slate-300 text-slate-700 px-8 py-4 rounded-lg font-semibold flex items-center justify-center hover:border-slate-400 transition-all">
                   <Play className="w-5 h-5 mr-2" />
                   Voir la démo
-                </button>
+                </Link>
               </div>
 
               <div className="flex items-center space-x-6 text-sm text-slate-600">
