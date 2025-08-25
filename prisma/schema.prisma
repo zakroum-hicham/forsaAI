@@ -53,12 +53,32 @@ model User {
   password       String?
   image          String?
   role           String           @default("recruiter")
+  githubProfile  GitHubProfile?   
+  githubProfileId String?        
   accounts       Account[]
   sessions       Session[]
   jobs           Job[] // One-to-many relation with Job
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   JobApplication JobApplication[]
+}
+
+
+model GitHubProfile {
+  id                        String   @id @default(uuid())
+  userId                    String   @unique
+  user                      User     @relation(fields: [userId], references: [id])
+  login                     String   // GitHub username
+  bio                       String?  // Bio of the user on GitHub
+  avatarUrl                 String?  // Avatar URL of the user on GitHub
+  followersCount            Int      // Number of followers
+  followingCount            Int      // Number of following
+  repositoriesCount         Int      // Total repositories count
+  topRepositories           Json?    // Store top repositories as JSON
+  contributionsTotal        Int?     // Total commits or contributions
+  contributionsCalendar     Json?    // Contribution calendar data
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
 }
 
 model JobApplication {

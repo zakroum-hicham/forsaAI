@@ -5,8 +5,109 @@ import GitHubProvider from 'next-auth/providers/github'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 
+// GraphQL query to fetch GitHub user data
+const GITHUB_USER_QUERY = `
+  query getUserData($login: String!) {
+    user(login: $login) {
+      name
+      login
+      avatarUrl
+      bio
+      repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
+        totalCount
+      }
+      followers {
+        totalCount
+      }
+      following {
+        totalCount
+      }
+      url
+      createdAt
+      contributionsCollection {
+        totalCommitContributions
+        restrictedContributionsCount
+        totalRepositoriesWithContributedCommits
+        contributionCalendar {
+          totalContributions
+          weeks {
+            contributionDays {
+              contributionCount
+              date
+            }
+          }
+        }
+      }
+      topRepositories(first: 10, orderBy: {field: STARGAZERS, direction: DESC}) {
+        nodes {
+          name
+          url
+          description
+          stargazerCount
+          forkCount
+          primaryLanguage {
+            name
+            color
+          }
+          updatedAt
+        }
+      }
+      repositoriesContributedTo(includeUserRepositories: false) {
+        totalCount
+      }
+      starredRepositories {
+        totalCount
+      }
+    }
+  }
+`;
+async function fetchGitHubProfile(accessToken: string) {
+  const response = await fetch('https://api.github.com/user', {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch GitHub profile');
+  }
+
+  const profile = await response.json();
+  return profile;
+}
+
+async function fetchGitHubUserData(accessToken: string, username: string) {
+  try {
+    const response = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: GITHUB_USER_QUERY,
+        variables: { login: username },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`GitHub API responded with ${response.status}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.errors) {
+      throw new Error(result.errors[0].message);
+    }
+
+    return result.data.user;
+  } catch (error) {
+    console.error('Error fetching GitHub user data:', error);
+    return null;
+  }
+}
+
 export const authOptions: NextAuthOptions = {
-  // adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -34,37 +135,97 @@ export const authOptions: NextAuthOptions = {
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          scope: "read:user user:email repo",
+        },
+      },
     }),
     GitHubProvider({
       id: 'github-candidat',
       clientId: process.env.GITHUB_CANDIDATE_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CANDIDATE_CLIENT_SECRET!
+      clientSecret: process.env.GITHUB_CANDIDATE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          scope: "read:user user:email repo",
+        },
+      },
     }),
   ],
   callbacks: {
     async signIn({ user, account }) {
       if (account && (account.provider === 'google' || account.provider.includes('github'))) {
-          let existingUser = await prisma.user.findUnique({
-            where: { email: user.email ?? '' },
+        let existingUser = await prisma.user.findUnique({
+          where: { email: user.email ?? '' },
+        });
+
+        if (!existingUser) {
+          // Split the name and use the first part as firstName
+          const firstName = user.name?.split(' ')[0] || '';
+          const role = account.provider.includes('candidat') ? 'candidat' : 'recruiter';
+          
+          existingUser = await prisma.user.create({
+            data: {
+              email: user.email!,
+              name: user.name || '',
+              firstName: firstName,
+              lastName: user.name?.split(' ').slice(1).join(' ') || '',
+              image: user.image || '',
+              role: role,
+            }
           });
+        }
 
-  if (!existingUser) {
-    // Split the name and use the first part as firstName
-    const firstName = user.name?.split(' ')[0] || '';
-    const role = account.provider.includes('candidat') ? 'candidat' : 'recruiter';
-    existingUser = await prisma.user.create({
-      data: {
-        email: user.email!,
-        name: user.name || '',
-        firstName: firstName,
-        lastName: user.name?.split(' ').slice(1).join(' ') || '',
-        image: user.image || '',
-        role: role,
+        // If it's a GitHub login, fetch and store GitHub data
+        if ((account.provider === 'github-candidat') && account.access_token) {
+          try {
+            const githubProfile = await fetchGitHubProfile(account.access_token);
+
+            const githubUsername = githubProfile.login;
+            
+            // Fetch GitHub user data
+            const githubData = await fetchGitHubUserData(account.access_token, githubUsername);
+            
+            if (githubData) {
+              // Update or create GitHub profile
+              await prisma.gitHubProfile.upsert({
+                where: { userId: existingUser.id },
+                update: {
+                  login: githubData.login,
+                  bio: githubData.bio,
+                  avatarUrl: githubData.avatarUrl,
+                  followersCount: githubData.followers.totalCount,
+                  followingCount: githubData.following.totalCount,
+                  repositoriesCount: githubData.repositories.totalCount,
+                  topRepositories: githubData.topRepositories.nodes,
+                  contributionsTotal: githubData.contributionsCollection.totalCommitContributions,
+                  contributionsCalendar: githubData.contributionsCollection.contributionCalendar,
+                  // currentStreak: streaks.current,
+                  // longestStreak: streaks.longest,
+                  updatedAt: new Date(),
+                },
+                create: {
+                  userId: existingUser.id,
+                  login: githubData.login,
+                  bio: githubData.bio,
+                  avatarUrl: githubData.avatarUrl,
+                  followersCount: githubData.followers.totalCount,
+                  followingCount: githubData.following.totalCount,
+                  repositoriesCount: githubData.repositories.totalCount,
+                  topRepositories: githubData.topRepositories.nodes,
+                  contributionsTotal: githubData.contributionsCollection.totalCommitContributions,
+                  contributionsCalendar: githubData.contributionsCollection.contributionCalendar,
+                  // currentStreak: streaks.current,
+                  // longestStreak: streaks.longest,
+                },
+              });
+            }
+          } catch (error) {
+            console.error('Error storing GitHub data:', error);
+            // Don't throw error to allow login to continue
+          }
+        }
       }
-    });
-  }
-}
-
 
       return true; // Allow login
     },
@@ -98,9 +259,7 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt'
   },
   pages: {
-    signIn: '/login',  // Redirect to login if unauthorized
-    // newUser: '/job/create' // it does not work maybe because i redirect auth user to dashboard
-
+    signIn: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET
 }
@@ -108,4 +267,3 @@ export const authOptions: NextAuthOptions = {
 const handler = NextAuth(authOptions)
 
 export { handler as GET, handler as POST }
-
