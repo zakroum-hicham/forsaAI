@@ -1,116 +1,12 @@
 import { Eye, MapPin, MoreHorizontal, Search } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-const Candidates = () => {
+const Candidates = ({ candidateData }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedFilter, setSelectedFilter] = useState('all');
 
-     const candidates = [
-    {
-      id: 1,
-      name: 'Sarah Chen',
-      email: 'sarah.chen@example.com',
-      phone: '+1 (555) 123-4567',
-      location: 'San Francisco, CA',
-      avatar: 'SC',
-      overallScore: 94,
-      githubScore: 92,
-      hackathonsScore: 88,
-      devsportScore: 96,
-      status: 'Interview',
-      appliedDate: '2024-08-20',
-      github: 'sarahchen',
-      linkedin: 'sarah-chen-dev',
-      portfolio: 'sarahchen.dev',
-      experience: '5 years',
-      currentRole: 'Senior Frontend Developer',
-      company: 'TechCorp',
-      skills: ['React', 'TypeScript', 'Node.js', 'AWS'],
-      githubStats: {
-        repos: 87,
-        followers: 1234,
-        contributions: 2847
-      }
-    },
-    {
-      id: 2,
-      name: 'Marcus Johnson',
-      email: 'marcus.johnson@example.com',
-      phone: '+1 (555) 987-6543',
-      location: 'New York, NY',
-      avatar: 'MJ',
-      overallScore: 91,
-      githubScore: 89,
-      hackathonsScore: 95,
-      devsportScore: 89,
-      status: 'Under Review',
-      appliedDate: '2024-08-18',
-      github: 'marcusj',
-      linkedin: 'marcus-johnson',
-      portfolio: 'marcuscode.io',
-      experience: '4 years',
-      currentRole: 'Full Stack Developer',
-      company: 'StartupXYZ',
-      skills: ['Python', 'Django', 'React', 'PostgreSQL'],
-      githubStats: {
-        repos: 62,
-        followers: 892,
-        contributions: 1923
-      }
-    },
-    {
-      id: 3,
-      name: 'Elena Rodriguez',
-      email: 'elena.rodriguez@example.com',
-      phone: '+1 (555) 456-7890',
-      location: 'Austin, TX',
-      avatar: 'ER',
-      overallScore: 87,
-      githubScore: 85,
-      hackathonsScore: 91,
-      devsportScore: 85,
-      status: 'Interview',
-      appliedDate: '2024-08-22',
-      github: 'elenarodriguez',
-      linkedin: 'elena-rodriguez-dev',
-      portfolio: 'elenadev.com',
-      experience: '3 years',
-      currentRole: 'Backend Developer',
-      company: 'CloudTech',
-      skills: ['Go', 'Kubernetes', 'Docker', 'MongoDB'],
-      githubStats: {
-        repos: 45,
-        followers: 567,
-        contributions: 1456
-      }
-    },
-    {
-      id: 4,
-      name: 'David Kim',
-      email: 'david.kim@example.com',
-      phone: '+1 (555) 321-0987',
-      location: 'Seattle, WA',
-      avatar: 'DK',
-      overallScore: 82,
-      githubScore: 80,
-      hackathonsScore: 78,
-      devsportScore: 88,
-      status: 'Under Review',
-      appliedDate: '2024-08-19',
-      github: 'davidkim',
-      linkedin: 'david-kim-engineer',
-      portfolio: 'davidkim.tech',
-      experience: '6 years',
-      currentRole: 'DevOps Engineer',
-      company: 'MegaCorp',
-      skills: ['AWS', 'Terraform', 'Python', 'Jenkins'],
-      githubStats: {
-        repos: 73,
-        followers: 445,
-        contributions: 1287
-      }
-    }
-  ];
+    const candidates = candidateData || [];
 
     const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-green-600 bg-green-50';
@@ -140,7 +36,7 @@ const Candidates = () => {
     }, [searchTerm, selectedFilter]);
 
   return (
-   <div className="space-y-6">
+   <div className="space-y-6 pb-6">
                {/* Search and Filter Bar */}
                <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
@@ -200,16 +96,17 @@ const Candidates = () => {
                            <td className="px-6 py-4 whitespace-nowrap">
                              <div className="flex items-center">
                                <div className="flex-shrink-0 h-12 w-12">
-                                 <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium">
-                                   {candidate.avatar}
-                                 </div>
+                                 <Avatar className="h-8 w-8">
+                                  <AvatarImage src={candidate.avatarUrl || ""} alt="User" />
+                                  <AvatarFallback>{candidate.name?.charAt(0).toUpperCase() + candidate.name?.split(" ")?.pop()?.charAt(0).toUpperCase()}</AvatarFallback>
+                                </Avatar>
                                </div>
                                <div className="ml-4">
                                  <div className="text-sm font-medium text-gray-900">{candidate.name}</div>
                                  <div className="text-sm text-gray-500">{candidate.email}</div>
                                  <div className="text-xs text-gray-400 flex items-center mt-1">
                                    <MapPin className="w-3 h-3 mr-1" />
-                                   {candidate.location}
+                                   {candidate.location || 'NO LOCATION'}
                                  </div>
                                </div>
                              </div>
@@ -222,9 +119,9 @@ const Candidates = () => {
                            <td className="px-6 py-4 whitespace-nowrap">
                              <div className="flex flex-col">
                                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${getScoreColor(candidate.githubScore)} mb-1`}>
-                                 {candidate.githubScore}
+                                 {Math.round(candidate.githubScore)}
                                </span>
-                               <span className="text-xs text-gray-500">{candidate.githubStats.contributions} contrib</span>
+                               <span className="text-xs text-gray-500">{candidate.contributions} contrib</span>
                              </div>
                            </td>
                            <td className="px-6 py-4 whitespace-nowrap">
