@@ -133,3 +133,56 @@ function calculateGithubScore(githubProfile: any): number {
   }
   return score;
 }
+
+export async function getCandidateProfile(candidateId: string) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: candidateId,
+    },
+    include: {
+      githubProfile: true,
+      JobApplication: {
+        orderBy: { createdAt: 'desc' }, // in case you want latest application
+        take: 1, // assuming you want the latest job application
+      },
+    },
+  });
+
+  if (!user) return null;
+
+  const jobApplication = user.JobApplication[0] || null;
+
+  const candidateProfile = {
+    id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    email: user.email,
+    university: jobApplication?.university || null,
+    major: jobApplication?.major || null,
+    graduationYear: jobApplication?.graduationYear || null,
+    linkedinUrl: jobApplication?.linkedinUrl || null,
+    portfolioUrl: jobApplication?.portfolioUrl || null,
+    devpostUsername: jobApplication?.devpostUsername || null,
+    whyInterested: jobApplication?.whyInterested || null,
+    appliedOn: jobApplication?.createdAt || null,
+    githubConnected: jobApplication?.githubConnected || false,
+
+    github: user.githubProfile
+      ? {
+          login: user.githubProfile.login,
+          avatarUrl: user.githubProfile.avatarUrl,
+          bio: user.githubProfile.bio,
+          followers: user.githubProfile.followersCount,
+          following: user.githubProfile.followingCount,
+          repositoriesCount: user.githubProfile.repositoriesCount,
+          topRepositories: user.githubProfile.topRepositories,
+          contributionsTotal: user.githubProfile.contributionsTotal,
+          contributionsCalendar: user.githubProfile.contributionsCalendar,
+          createdAt: user.githubProfile.createdAt,
+        }
+      : null,
+  };
+
+  return candidateProfile;
+}
+
