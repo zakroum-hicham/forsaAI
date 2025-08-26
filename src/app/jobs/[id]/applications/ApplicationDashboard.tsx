@@ -6,7 +6,7 @@ import Candidates from '@/components/analytics/Candidates';
 import GitHub from '@/components/analytics/Github';
 import Header from '@/components/analytics/Header';
 
-const ApplicantAnalyticsDashboard = ({ headerData}) => {
+const ApplicantAnalyticsDashboard = ({ headerData , candidateData }) => {
   const [selectedTab, setSelectedTab] = useState('overview');
 
   const tabs = [
@@ -50,7 +50,7 @@ const ApplicantAnalyticsDashboard = ({ headerData}) => {
         {/* Tab Content */}
         <div className="space-y-8">
           {selectedTab === 'overview' && <Overview />}
-          {selectedTab === 'candidates' && <Candidates />}
+          {selectedTab === 'candidates' && <Candidates candidateData={candidateData} />}
           {selectedTab === 'github' && <GitHub />}
           {/* Add future tab content as needed */}
         </div>
