@@ -230,7 +230,7 @@ Additional Information:
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/jobs" className="text-slate-600 hover:text-slate-900">Jobs</Link>
+                  <Link href="/dashboard" className="text-slate-600 hover:text-slate-900">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -257,15 +257,16 @@ Additional Information:
           <div className="text-center mb-8">
             {mode === 'edit' && (
               <div className="flex items-center justify-center mb-3">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.back()}
-                  className="mr-4 text-slate-600 hover:text-slate-900"
-                >
+                <Link href={`/jobs/${job?.id}`}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="mr-4 text-slate-600 hover:text-slate-900"
+                  >
                   <ArrowLeft className="w-4 h-4 mr-1" />
-                  Back to Details
+                  Details Page
                 </Button>
+                </Link>
                 {job && (
                   <Badge variant={job.status === 'ACTIVE' ? 'default' : 'secondary'}>
                     {job.status}
