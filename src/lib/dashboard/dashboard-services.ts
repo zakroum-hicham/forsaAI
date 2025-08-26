@@ -424,10 +424,3 @@ export async function getDashboardData(userId: string): Promise<DashboardApiResp
     pipelineData: pipelineData.filter(Boolean) as JobPipeline[]
   };
 }
-
-/**
- * Cleanup function to disconnect Prisma client
- */
-export async function disconnectPrisma() {
-  await prisma.$disconnect();
-}
