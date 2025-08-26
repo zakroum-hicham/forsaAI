@@ -37,7 +37,7 @@ interface JobFormProps {
   onSuccess?: (job: Job) => void;
 }
 
-const JobForm = ({ mode = 'create', job, onSuccess }: JobFormProps) => {
+const JobForm = ({ mode = 'create', job }: JobFormProps) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -182,16 +182,13 @@ Additional Information:
 
       if (!response.ok) {
         const errorData = await response.json();
-        const errorMessage = errorData?.error?.message || errorData?.error || `Failed to ${mode} job`;
+        const errorMessage = errorData.error[0]?.message || `Failed to ${mode} job`;
         console.error("API Error:", errorMessage);
         throw new Error(errorMessage);
       }
       
       const responseJob = await response.json();
       setSuccess(true);
-      
-      // Call onSuccess callback if provided
-      onSuccess?.(responseJob);
       
       // Redirect based on mode
       setTimeout(() => {
