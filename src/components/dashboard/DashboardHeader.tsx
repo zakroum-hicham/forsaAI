@@ -13,7 +13,12 @@ import Logo from "../Logo"
 import Link from "next/link"
 import SignOutButton from "../SignOutButton"
 
-const DashboardHeader = ({ session }) => {
+const DashboardHeader = ({ session }: { session: SessionType }) => {
+
+  const name = session?.user?.name || "";
+  const nameParts = name.split(" ");
+  const firstNameInitial = name.charAt(0).toUpperCase() || "?";
+  const lastNameInitial = nameParts.length > 1 ? nameParts.pop()?.charAt(0).toUpperCase() : "";
   return (
     <header className="border-b border-border bg-background px-6 py-4">
       <div className="flex items-center justify-between">
@@ -43,8 +48,8 @@ const DashboardHeader = ({ session }) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={session?.user?.image || ""} alt="User" />
-                  <AvatarFallback>{session?.user?.name?.charAt(0).toUpperCase() + session?.user?.name?.split(" ")?.pop()?.charAt(0).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={session?.user?.image} alt="User" />
+                  <AvatarFallback>{firstNameInitial + lastNameInitial || "?"}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>

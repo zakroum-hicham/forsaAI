@@ -7,26 +7,25 @@ import bcrypt from 'bcryptjs'
 
 // GraphQL query to fetch GitHub user data
 const GITHUB_USER_QUERY = `
-  query getUserData($login: String!) {
-    user(login: $login) {
+  query {
+    viewer{
       name
       login
       avatarUrl
-      bio
-      repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
-        totalCount
-      }
+      bioHTML
+      location
+      url
+      createdAt
       followers {
         totalCount
       }
       following {
         totalCount
       }
-      url
-      createdAt
       contributionsCollection {
         totalCommitContributions
-        restrictedContributionsCount
+        totalPullRequestContributions
+        totalIssueContributions
         totalRepositoriesWithContributedCommits
         contributionCalendar {
           totalContributions
@@ -34,49 +33,97 @@ const GITHUB_USER_QUERY = `
             contributionDays {
               contributionCount
               date
+              color
             }
           }
         }
       }
-      topRepositories(first: 10, orderBy: {field: STARGAZERS, direction: DESC}) {
-        nodes {
+      
+      # Repositories owned by the user
+    repositories(first: 50, privacy: PUBLIC, orderBy: {field: STARGAZERS, direction: DESC}) {
+      totalCount
+      nodes {
+        name
+        description
+        url
+        isFork
+        stargazerCount
+        forkCount
+        createdAt
+        updatedAt
+        primaryLanguage {
           name
-          url
-          description
-          stargazerCount
-          forkCount
-          primaryLanguage {
-            name
-            color
+          color
+        }
+        languages(first: 2) {
+          edges {
+            size
+            node {
+              name
+              color
+            }
           }
-          updatedAt
+        }
+        repositoryTopics(first: 10) {
+          nodes {
+            topic {
+              name
+            }
+          }
         }
       }
-      repositoriesContributedTo(includeUserRepositories: false) {
-        totalCount
+    }
+
+    # Contributions to other repos (collaboration signal)
+    repositoriesContributedTo(first: 20, contributionTypes: [COMMIT, ISSUE, PULL_REQUEST]) {
+      totalCount
+      nodes {
+        name
+        owner {
+          login
+        }
+        url
       }
+    }
+
+    # Pull requests (collaboration + code review)
+    pullRequests(first: 20, orderBy: {field: CREATED_AT, direction: DESC}) {
+      totalCount
+      nodes {
+        title
+        url
+        state
+        createdAt
+        mergedAt
+        additions
+        deletions
+      }
+    }
+
+    # Issues raised (problem solving + communication)
+    issues(first: 20, orderBy: {field: CREATED_AT, direction: DESC}) {
+      totalCount
+      nodes {
+        title
+        url
+        state
+        createdAt
+        closedAt
+      }
+    }
+
+    # Code review activity
+    contributionsCollection {
+      totalPullRequestReviewContributions
+    }
       starredRepositories {
         totalCount
       }
     }
   }
 `;
-async function fetchGitHubProfile(accessToken: string) {
-  const response = await fetch('https://api.github.com/user', {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch GitHub profile');
-  }
-
-  const profile = await response.json();
-  return profile;
-}
-
-async function fetchGitHubUserData(accessToken: string, username: string) {
+async function fetchGitHubUserData(accessToken: string) {
   try {
     const response = await fetch('https://api.github.com/graphql', {
       method: 'POST',
@@ -86,7 +133,6 @@ async function fetchGitHubUserData(accessToken: string, username: string) {
       },
       body: JSON.stringify({
         query: GITHUB_USER_QUERY,
-        variables: { login: username },
       }),
     });
 
@@ -95,14 +141,13 @@ async function fetchGitHubUserData(accessToken: string, username: string) {
     }
 
     const result = await response.json();
-    
     if (result.errors) {
       throw new Error(result.errors[0].message);
     }
 
-    return result.data.user;
+    return result.data.viewer;
   } catch (error) {
-    console.error('Error fetching GitHub user data:', error);
+    // console.error('Error fetching GitHub user data:', error);
     return null;
   }
 }
@@ -135,21 +180,21 @@ export const authOptions: NextAuthOptions = {
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          scope: "read:user user:email repo",
-        },
-      },
+      // authorization: {
+      //   params: {
+      //     scope: "read:user user:email repo",
+      //   },
+      // },
     }),
     GitHubProvider({
       id: 'github-candidat',
       clientId: process.env.GITHUB_CANDIDATE_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CANDIDATE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          scope: "read:user user:email repo",
-        },
-      },
+      // authorization: {
+      //   params: {
+      //     scope: "read:user user:email repo",
+      //   },
+      // },
     }),
   ],
   callbacks: {
@@ -179,44 +224,53 @@ export const authOptions: NextAuthOptions = {
         // If it's a GitHub login, fetch and store GitHub data
         if ((account.provider === 'github-candidat') && account.access_token) {
           try {
-            const githubProfile = await fetchGitHubProfile(account.access_token);
-
-            const githubUsername = githubProfile.login;
             
             // Fetch GitHub user data
-            const githubData = await fetchGitHubUserData(account.access_token, githubUsername);
-            
+            const githubData = await fetchGitHubUserData(account.access_token);
             if (githubData) {
               // Update or create GitHub profile
               await prisma.gitHubProfile.upsert({
                 where: { userId: existingUser.id },
                 update: {
+                  accessToken: account.access_token,
                   login: githubData.login,
-                  bio: githubData.bio,
+                  name: githubData.name,
+                  bioHTML: githubData.bioHTML,
+                  location: githubData.location,
+                  url: githubData.url,
+                  githubCreatedAt : githubData.createdAt,
                   avatarUrl: githubData.avatarUrl,
                   followersCount: githubData.followers.totalCount,
                   followingCount: githubData.following.totalCount,
-                  repositoriesCount: githubData.repositories.totalCount,
-                  topRepositories: githubData.topRepositories.nodes,
-                  contributionsTotal: githubData.contributionsCollection.totalCommitContributions,
-                  contributionsCalendar: githubData.contributionsCollection.contributionCalendar,
-                  // currentStreak: streaks.current,
-                  // longestStreak: streaks.longest,
+
+                  contributionsCollection: githubData.contributionsCollection,
+                  repositories : githubData.repositories,
+                  Contributions: githubData.Contributions,
+                  pullRequests: githubData.pullRequests,
+                  issues : githubData.issues,
+                  CodeReviewActivity : githubData.CodeReviewActivity,
+
                   updatedAt: new Date(),
                 },
                 create: {
                   userId: existingUser.id,
+                  accessToken: account.access_token,
+                  name: githubData.name,
                   login: githubData.login,
-                  bio: githubData.bio,
+                  bioHTML: githubData.bioHTML,
+                  location: githubData.location,
+                  url: githubData.url,
+                  githubCreatedAt : githubData.createdAt,
                   avatarUrl: githubData.avatarUrl,
                   followersCount: githubData.followers.totalCount,
                   followingCount: githubData.following.totalCount,
-                  repositoriesCount: githubData.repositories.totalCount,
-                  topRepositories: githubData.topRepositories.nodes,
-                  contributionsTotal: githubData.contributionsCollection.totalCommitContributions,
-                  contributionsCalendar: githubData.contributionsCollection.contributionCalendar,
-                  // currentStreak: streaks.current,
-                  // longestStreak: streaks.longest,
+
+                  contributionsCollection: githubData.contributionsCollection,
+                  repositories : githubData.repositories,
+                  Contributions: githubData.Contributions,
+                  pullRequests: githubData.pullRequests,
+                  issues : githubData.issues,
+                  CodeReviewActivity : githubData.CodeReviewActivity,
                 },
               });
             }

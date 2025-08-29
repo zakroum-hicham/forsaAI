@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import {registerSchema} from "@/lib/validations"
+import { z } from 'zod'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { firstName, lastName, email, password, company } = body
+    const parsed = registerSchema.parse(body)
 
-    if (!email || !password || !firstName || !lastName) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
-    }
+    const { firstName, lastName, email, password, company, acceptTerms, acceptMarketing, confirmPassword } = parsed
 
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({
@@ -37,7 +37,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, userId: user.id }, { status: 201 })
 
   } catch (error) {
-    console.error('Registration error:', error)
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ errors: error.flatten().fieldErrors });
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -8,7 +8,6 @@ export async function CheckUserApplication(
   jobId: string, 
   userId: string
 ): Promise<UserApplication | null> {
-  try {
     const application = await prisma.jobApplication.findFirst({
       where: {
         jobId: jobId,
@@ -28,8 +27,4 @@ export async function CheckUserApplication(
       id: application.id,
       appliedDate: application.createdAt,
     };
-  } catch (error) {
-    console.error('Error checking user application:', error);
-    return null;
-  }
 }

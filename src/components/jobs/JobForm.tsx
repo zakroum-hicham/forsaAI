@@ -59,7 +59,6 @@ const JobForm = ({ mode = 'create', job }: JobFormProps) => {
         jobDescription: job.description,
         requirements: job.requirements,
         status: job.status,
-        companyId: '1'
       };
     }
     

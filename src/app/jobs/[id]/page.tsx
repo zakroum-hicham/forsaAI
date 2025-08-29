@@ -16,7 +16,7 @@ export default async function JobPage({ params }: { params: { id: string } }) {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/jobs" className="text-slate-600 hover:text-slate-900">Jobs</Link>
+                  <Link href="/dashboard" className="text-slate-600 hover:text-slate-900">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

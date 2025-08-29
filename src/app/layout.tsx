@@ -1,3 +1,4 @@
+import { Toaster } from 'sonner'
 import './globals.css'
 import { ReactNode } from 'react'
 
@@ -12,6 +13,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <body>
         <main>
+          <Toaster
+              position="top-center"
+              richColors
+              expand
+              closeButton
+              toastOptions={{
+                classNames: {
+                  toast: 'font-sans',
+                  title: 'font-medium',
+                },
+              }}
+            />
           {children}
         </main>
       </body>

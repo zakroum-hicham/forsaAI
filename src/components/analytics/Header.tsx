@@ -1,4 +1,6 @@
 import { Award, GitBranch, TrendingUp, Users } from "lucide-react"
+import Link from "next/link";
+import { Button } from "../ui/button";
 
 const Header = ({headerData}) => {
       // Mock data for the dashboard
@@ -20,6 +22,13 @@ const Header = ({headerData}) => {
               <h1 className="text-2xl font-bold text-gray-900">Applicant Analytics</h1>
               <span className="text-sm text-gray-500">{headerData.jobTitle}</span>
             </div>
+            <Link href="/dashboard">
+              <Button
+                className="whitespace-nowrap"
+                >
+                ← Back to Dashboard
+              </Button>
+              </Link>
           </div>
         </div>
       </div>

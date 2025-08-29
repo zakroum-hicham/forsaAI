@@ -7,8 +7,7 @@ import { use } from 'react'
 
 
 export default function LoginPage({ params }: any) { 
-  const { id } = use(params)
-  console.log("Job ID:", id);
+  const { id } : { id: string } = use(params)
 
   const handleLogin = async () => {
     const callbackUrl = `${window.location.origin}/public/jobs/${id}/apply`

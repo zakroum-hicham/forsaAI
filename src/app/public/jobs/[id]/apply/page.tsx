@@ -1,14 +1,25 @@
 import { GetJob } from '@/lib/jobs/get-job';
-import { notFound } from 'next/navigation';
-import JobApply from './JobApply';
+import { notFound, redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import JobApplicationForm from './JobApply';
+import { CheckUserApplication, UserApplication } from '@/lib/jobs/check-user-application';
 
 
 export default async function Page({ params }: { params: { id: string } }) {
-  const job = await GetJob(params.id);
-  const session = await getServerSession(authOptions);
+  const {id} = await params;
+  const session :SessionType = await getServerSession(authOptions);
+
+  let userApplication: UserApplication | null = null;
+    if (session?.user?.id) {
+      userApplication = await CheckUserApplication(id, session.user.id);
+    }
+  const hasAlreadyApplied = !!userApplication;
+  if (hasAlreadyApplied) {
+    redirect(`/public/jobs/${id}`);
+  }
+  const job = await GetJob(id);
 
   if (!job || !job.public) return notFound();
-  return <JobApply job={job} session={session} />;
+  return <JobApplicationForm job={job} session={session} />;
 }

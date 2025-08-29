@@ -15,6 +15,7 @@ import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react';
 
+
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -110,12 +111,14 @@ export default function RegisterPage() {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
+        confirmPassword: formData.confirmPassword,
         company: formData.company ? formData.company : "",
+        acceptTerms: formData.acceptTerms,
+        acceptMarketing: formData.acceptMarketing
       }),
     })
 
     const data = await res.json()
-    console.log('Registration response:', data)
 
     if (!res.ok) {
       setErrors({ server: data.error || 'Registration failed' })

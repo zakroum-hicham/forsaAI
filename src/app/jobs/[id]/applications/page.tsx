@@ -4,9 +4,9 @@ import { getHeaderAnalytics ,getCandidateAnalytics} from "@/lib/applicationAnaly
 const Page = async({ params }: { params: { id: string } }) => {
   const headerData = await getHeaderAnalytics(params.id);
   const candidateData = await getCandidateAnalytics(params.id);
-  console.log("candidateData",candidateData);
+  const topCandidates = candidateData?.filter(candidate => candidate.overallScore >= 80);
   return (
-    <ApplicantAnalyticsDashboard headerData={headerData} candidateData={candidateData} />
+    <ApplicantAnalyticsDashboard headerData={headerData} candidateData={candidateData} topCandidates={topCandidates} />
   );
 };
 

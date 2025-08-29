@@ -5,8 +5,6 @@ import {
   MoreHorizontal, 
   Search, 
   Filter,
-  Download,
-  Plus,
   Github,
   Trophy,
   Mail,
@@ -35,7 +33,7 @@ import {
 import Link from "next/link";
 
 
-const Candidates = ({ candidateData }) => {
+const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", description="Manage and review candidate applications" }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [sortField, setSortField] = useState('overallScore');
@@ -111,27 +109,28 @@ const Candidates = ({ candidateData }) => {
 
 
   return (
+    <>
     <TooltipProvider>
-      <div className="space-y-6 p-6 max-w-7xl mx-auto">
         {/* Main Content */}
         <Card>
-          <CardHeader className="pb-4">
+          <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
               <div>
-                <CardTitle className="text-xl">Candidate Pipeline</CardTitle>
+                <CardTitle className="text-xl">{title}</CardTitle>
                 <CardDescription>
-                  Manage and review candidate applications
+                  {description}
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
 
           <CardContent className="space-y-4">
-           {/* Search and Filters */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1 max-w-sm relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
+            {/* Search and Filters */}
+            {mode === 'all' && (
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="flex-1 max-w-sm relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
                   placeholder="Search candidates..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -159,7 +158,7 @@ const Candidates = ({ candidateData }) => {
                 </div>
               </div>
             </div>
-
+            )}
 
             <Separator />
 
@@ -169,6 +168,7 @@ const Candidates = ({ candidateData }) => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b bg-gray-50/50">
+                      {mode === "top" && <th className="text-left p-4 font-medium text-gray-600">Rank</th>}
                       <th className="text-left p-4 font-medium text-gray-900">
                         <SortButton field="name">Candidate</SortButton>
                       </th>
@@ -194,6 +194,15 @@ const Candidates = ({ candidateData }) => {
                           index % 2 === 0 ? 'bg-white' : 'bg-gray-50/25'
                         }`}
                       >
+                        {mode === "top" && (
+                          <td className="p-4">
+                            <div className="flex items-center">
+                              <Badge variant={index < 3 ? "default" : "outline"} className="w-8 h-8 rounded-full flex items-center justify-center p-0">
+                                {index + 1}
+                              </Badge>
+                            </div>
+                          </td>
+                        )}
                         <td className="p-4">
                           <div className="flex items-center space-x-3">
                             <Avatar className="h-10 w-10">
@@ -212,7 +221,7 @@ const Candidates = ({ candidateData }) => {
                               </div>
                               <div className="flex items-center space-x-1 text-xs text-gray-400">
                                 <MapPin className="h-3 w-3" />
-                                <span>{candidate.location}</span>
+                                <span>{candidate.location || "Unknown"}</span>
                               </div>
                             </div>
                           </div>
@@ -342,8 +351,8 @@ const Candidates = ({ candidateData }) => {
             </div>
           </CardContent>
         </Card>
-      </div>
     </TooltipProvider>
+    </>
   );
 };
 

@@ -321,7 +321,8 @@ export default function PipelineFunnel({
                     Biggest Drop:
                   </span>
                   <p className="text-blue-800 dark:text-blue-200">
-                    {enhancedPipelineData.reduce((max, stage) => 
+                    {/* check if enhancedPipelineData.stage && (fixes the problem)  */}
+                    {enhancedPipelineData.stage && enhancedPipelineData?.reduce((max, stage) => 
                       (stage.dropoffRate || 0) > (max.dropoffRate || 0) ? stage : max, 
                       enhancedPipelineData[0]
                     ).stage} stage

@@ -1,7 +1,8 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import Candidates from './Candidates';
 
 
-const Overview = () => {
+const Overview = ({topCandidates}) => {
     const statusData = [
     { name: 'Under Review', value: 45, color: '#3B82F6' },
     { name: 'Interview', value: 25, color: '#10B981' },
@@ -102,7 +103,12 @@ const Overview = () => {
             </ResponsiveContainer>
             </div>
         </div>
+
+        {/* candidates  */}
+        <div className="  lg:col-span-2">
+          <Candidates candidateData={topCandidates} mode='top' title='Top Performing Candidates' description='Highest-rated candidates based on overall performance score' />
         </div>
+      </div>
   );
 };
 

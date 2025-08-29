@@ -42,6 +42,21 @@ enum JobStatus {
   ARCHIVED
 }
 
+enum EducationLevel{
+  HIGH_SCHOOL
+  ASSOCIATE
+  BACHELOR
+  MASTER
+  PHD
+  OTHER
+}
+enum ExperienceEnum {
+  ZERO       // No experience (Student)
+  ONE_TWO    // 1-2 years
+  THREE_FIVE // 3-5 years
+  SIX_TEN    // 6-10 years
+  TEN_PLUS   // 10+ years
+}
 model User {
   id             String           @id @default(uuid())
   name           String?
@@ -67,16 +82,25 @@ model User {
 model GitHubProfile {
   id                        String   @id @default(uuid())
   userId                    String   @unique
-  user                      User     @relation(fields: [userId], references: [id])
+  user                      User     @relation(fields: [userId], references: [id],onDelete: Cascade)
+  accessToken               String
+  githubCreatedAt           DateTime?
   login                     String   // GitHub username
-  bio                       String?  // Bio of the user on GitHub
+  name                      String
+  location                  String?
+  url                       String?
+  bioHTML                   String?  // Bio of the user on GitHub
   avatarUrl                 String?  // Avatar URL of the user on GitHub
   followersCount            Int      // Number of followers
   followingCount            Int      // Number of following
-  repositoriesCount         Int      // Total repositories count
-  topRepositories           Json?    // Store top repositories as JSON
-  contributionsTotal        Int?     // Total commits or contributions
-  contributionsCalendar     Json?    // Contribution calendar data
+
+  contributionsCollection   Json?
+  repositories              Json?
+  Contributions             Json?
+  pullRequests              Json?
+  issues                    Json?
+  CodeReviewActivity        Json?
+
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
 }
@@ -92,15 +116,18 @@ model JobApplication {
   firstName       String
   lastName        String
   email           String
-  phone           String?
-  university      String?
-  major           String?
+  phone           String
+  city            String
+  educationLevel  EducationLevel
+  institution     String?
+  fieldOfStudy    String?
   graduationYear  String?
-  githubConnected Boolean
+  experience      ExperienceEnum
+  skills          String[]
   linkedinUrl     String?
   portfolioUrl    String?
-  devpostUsername String?
   whyInterested   String
+  termsAccepted   Boolean
 
   createdAt DateTime @default(now())
 }
