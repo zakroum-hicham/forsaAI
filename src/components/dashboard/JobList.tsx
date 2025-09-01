@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/select';
 import type { JobListProps, JobWithMetrics } from '@/types/dashboard';
 import Link from 'next/link';
+import { jobTypeColors } from '@/lib/UI_utils';
 
 /**
  * Individual job card component
@@ -67,13 +68,6 @@ function JobCard({ job, onSelect }: JobCardProps) {
     if (score >= 90) return 'text-green-600 dark:text-green-400';
     if (score >= 75) return 'text-blue-600 dark:text-blue-400';
     return 'text-gray-600 dark:text-gray-400';
-  };
-
-  const typeColors = {
-    FULL_TIME: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
-    PART_TIME: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
-    CONTRACT: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
-    INTERNSHIP: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100',
   };
 
   const daysUntilEnd = job.endPostingDate 
@@ -135,7 +129,7 @@ function JobCard({ job, onSelect }: JobCardProps) {
         <div className="space-y-4">
           {/* Type and Status Badges */}
           <div className="flex items-center space-x-2">
-            <Badge className={typeColors[job.type]}>
+            <Badge className={jobTypeColors[job.type]}>
               {job.type.replace('_', ' ')}
             </Badge>
             <Badge variant="outline" className="capitalize">
