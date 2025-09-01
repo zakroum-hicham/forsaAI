@@ -94,10 +94,10 @@ const ForsaAILanding = () => {
                 <h1 className="text-4xl lg:text-6xl font-bold text-slate-900 leading-tight">
                   Révolutionnez votre
                   <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"> recrutement</span>
-                  avec l'IA
+                  avec l&apos;IA
                 </h1>
                 <p className="text-xl text-slate-600 leading-relaxed">
-                  ForsaAI utilise l'intelligence artificielle pour analyser, classer et sélectionner les meilleurs candidats en quelques secondes. Transformez votre processus de recrutement.
+                  ForsaAI utilise l&apos;intelligence artificielle pour analyser, classer et sélectionner les meilleurs candidats en quelques secondes. Transformez votre processus de recrutement.
                 </p>
               </div>
               
@@ -262,7 +262,7 @@ const ForsaAILanding = () => {
                   ))}
                 </div>
                 <Quote className="w-8 h-8 text-slate-300 mb-4" />
-                <p className="text-slate-700 mb-6 leading-relaxed">"{testimonial.content}"</p>
+                <p className="text-slate-700 mb-6 leading-relaxed">&quot;{testimonial.content}&quot;</p>
                 <div className="flex items-center">
                   <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold mr-4">
                     {testimonial.avatar}
@@ -389,11 +389,11 @@ const ForsaAILanding = () => {
               Prêt à transformer votre recrutement ?
             </h2>
             <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-              Rejoignez des centaines d'entreprises qui ont déjà optimisé leur processus de recrutement avec ForsaAI.
+              Rejoignez des centaines d&apos;entreprises qui ont déjà optimisé leur processus de recrutement avec ForsaAI.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-all transform hover:scale-105 shadow-lg">
-                Démarrer l'essai gratuit
+                Démarrer l&apos;essai gratuit
               </button>
               <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-all">
                 Planifier une démo
@@ -442,7 +442,7 @@ const ForsaAILanding = () => {
             <div>
               <h4 className="font-semibold text-white mb-4">Support</h4>
               <ul className="space-y-2">
-                <li><a href="#" className="hover:text-white transition-colors">Centre d'aide</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Centre d&apos;aide</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Statut</a></li>
@@ -459,7 +459,7 @@ const ForsaAILanding = () => {
                 Politique de confidentialité
               </a>
               <a href="#" className="text-slate-400 hover:text-white transition-colors">
-                Conditions d'utilisation
+                Conditions d&apos;utilisation
               </a>
             </div>
           </div>

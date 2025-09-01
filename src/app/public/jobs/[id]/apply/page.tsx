@@ -1,12 +1,12 @@
 import { GetJob } from '@/lib/jobs/get-job';
 import { notFound, redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from "@/lib/auth";
 import JobApplicationForm from './JobApply';
 import { CheckUserApplication, UserApplication } from '@/lib/jobs/check-user-application';
 
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params } : { params: Promise<{id: string}> }) {
   const {id} = await params;
   const session :SessionType = await getServerSession(authOptions);
 

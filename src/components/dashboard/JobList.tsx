@@ -306,7 +306,7 @@ export default function JobList({ jobs, filters, onFiltersChange, onJobSelect, l
         <div className="flex items-center space-x-2">
           <Select
             value={filters.jobType}
-            onValueChange={(value) => onFiltersChange({ jobType: value as any })}
+            // onValueChange={(value) => onFiltersChange({ jobType: value })}
           >
             <SelectTrigger className="w-36">
               <SelectValue />
@@ -322,7 +322,7 @@ export default function JobList({ jobs, filters, onFiltersChange, onJobSelect, l
 
           <Select
             value={filters.sortBy}
-            onValueChange={(value) => onFiltersChange({ sortBy: value as any })}
+            // onValueChange={(value) => onFiltersChange({ sortBy: value })}
           >
             <SelectTrigger className="w-36">
               <SelectValue />

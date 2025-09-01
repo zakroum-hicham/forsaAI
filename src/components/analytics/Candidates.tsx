@@ -31,9 +31,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { CandidateAnalyticsData } from "@/lib/applicationAnalytics/services";
 
 
-const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", description="Manage and review candidate applications" }) => {
+const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", description="Manage and review candidate applications" } :{ candidateData: CandidateAnalyticsData[], mode?: string, title?: string, description?: string }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [sortField, setSortField] = useState('overallScore');
@@ -41,39 +42,43 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
 
   const candidates = candidateData || [];
 
-  const getScoreVariant = (score) => {
+  const getScoreVariant = (score: number) => {
     if (score >= 90) return "default";
     if (score >= 80) return "secondary";
     if (score >= 70) return "outline";
     return "destructive";
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string) => {
     const colors = {
       'Under Review': 'bg-blue-50 text-blue-700 border-blue-200',
       'Interview': 'bg-green-50 text-green-700 border-green-200',
       'Rejected': 'bg-red-50 text-red-700 border-red-200',
       'Hired': 'bg-purple-50 text-purple-700 border-purple-200'
     };
-    return colors[status] || 'bg-gray-50 text-gray-700 border-gray-200';
+    return colors[status as keyof typeof colors] || 'bg-gray-50 text-gray-700 border-gray-200';
   };
 
   const filteredAndSortedCandidates = useMemo(() => {
-    let filtered = candidates.filter(candidate => {
-      const matchesSearch = candidate.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          candidate.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          candidate.skills.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      const matchesFilter = selectedFilter === 'all' || candidate.status === selectedFilter;
-      
+  const filtered = candidates.filter(candidate => {
+      const matchesSearch = candidate?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          candidate?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+                          // candidate?.skills?.some(skill => skill.toLowerCase().includes(searchTerm.toLowerCase()))
+                          ;
+
+      const matchesFilter = selectedFilter === 'all' || candidate?.status === selectedFilter;
+
       return matchesSearch && matchesFilter;
     });
 
     // Sort candidates
-    filtered.sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
-      
+     filtered.sort((a, b) => {
+      if (a === null || b === null) {
+        return 0;
+      }
+      const aValue = a[sortField as keyof CandidateAnalyticsData];
+      const bValue = b[sortField as keyof CandidateAnalyticsData];
+      if (aValue === null || bValue === null) return 0;
       if (sortDirection === 'asc') {
         return aValue > bValue ? 1 : -1;
       } else {
@@ -84,7 +89,7 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
     return filtered;
   }, [candidates, searchTerm, selectedFilter, sortField, sortDirection]);
 
-  const handleSort = (field) => {
+  const handleSort = (field: React.SetStateAction<string>) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -93,7 +98,7 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
     }
   };
 
-  const SortButton = ({ field, children }) => (
+  const SortButton = ({ field, children } : {field:string, children :React.ReactNode}) => (
     <Button
       variant="ghost"
       size="sm"
@@ -189,7 +194,7 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
                   <tbody>
                     {filteredAndSortedCandidates.map((candidate, index) => (
                       <tr 
-                        key={candidate.id} 
+                        key={candidate?.id} 
                         className={`border-b hover:bg-gray-50/50 transition-colors ${
                           index % 2 === 0 ? 'bg-white' : 'bg-gray-50/25'
                         }`}
@@ -206,22 +211,22 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
                         <td className="p-4">
                           <div className="flex items-center space-x-3">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={candidate.avatarUrl || ""} alt={candidate.name} />
+                              <AvatarImage src={candidate?.avatarUrl ?? ""} alt={candidate?.name??''} />
                               <AvatarFallback className="bg-blue-100 text-blue-700">
-                                {candidate.name.split(' ').map(n => n[0]).join('')}
+                                {candidate?.name?.split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
                             </Avatar>
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium text-gray-900 truncate">
-                                {candidate.name}
+                                {candidate?.name}
                               </p>
                               <div className="flex items-center space-x-1 text-xs text-gray-500">
                                 <Mail className="h-3 w-3" />
-                                <span className="truncate">{candidate.email}</span>
+                                <span className="truncate">{candidate?.email}</span>
                               </div>
                               <div className="flex items-center space-x-1 text-xs text-gray-400">
                                 <MapPin className="h-3 w-3" />
-                                <span>{candidate.location || "Unknown"}</span>
+                                <span>{candidate?.location || "Unknown"}</span>
                               </div>
                             </div>
                           </div>
@@ -230,8 +235,8 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
                         <td className="p-4">
                           <Tooltip>
                             <TooltipTrigger>
-                              <Badge variant={getScoreVariant(candidate.overallScore)} className="font-mono">
-                                {candidate.overallScore}
+                              <Badge variant={getScoreVariant(candidate?.overallScore??0)} className="font-mono">
+                                {candidate?.overallScore}
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -244,9 +249,9 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
                           <div className="flex flex-col space-y-1">
                             <Tooltip>
                               <TooltipTrigger>
-                                <Badge variant={getScoreVariant(candidate.githubScore)} size="sm">
+                                <Badge variant={getScoreVariant(candidate?.githubScore??0)}>
                                   <Github className="mr-1 h-3 w-3" />
-                                  {candidate.githubScore}
+                                  {candidate?.githubScore}
                                 </Badge>
                               </TooltipTrigger>
                               <TooltipContent>
@@ -254,7 +259,7 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
                               </TooltipContent>
                             </Tooltip>
                             <span className="text-xs text-gray-500">
-                              {candidate.contributions} contributions
+                              {candidate?.contributions} contributions
                             </span>
                           </div>
                         </td>
@@ -262,9 +267,9 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
                         <td className="p-4">
                           <Tooltip>
                             <TooltipTrigger>
-                              <Badge variant={getScoreVariant(candidate.hackathonsScore)} size="sm">
+                              <Badge variant={getScoreVariant(candidate?.hackathonsScore??0)}>
                                 <Trophy className="mr-1 h-3 w-3" />
-                                {candidate.hackathonsScore}
+                                {candidate?.hackathonsScore}
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -274,18 +279,18 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
                         </td>
 
                         <td className="p-4">
-                          <div className="text-sm text-gray-900">{candidate.experience}</div>
+                          <div className="text-sm text-gray-900">{candidate?.experience}</div>
                           <div className="text-xs text-gray-500 truncate max-w-32">
-                            {candidate.currentRole}
+                            {candidate?.currentRole}
                           </div>
                         </td>
 
                         <td className="p-4">
                           <Badge 
                             variant="outline" 
-                            className={getStatusColor(candidate.status)}
+                            className={getStatusColor(candidate?.status??'Unknown')}
                           >
-                            {candidate.status}
+                            {candidate?.status}
                           </Badge>
                         </td>
 
@@ -293,7 +298,7 @@ const Candidates = ({ candidateData, mode="all", title="Candidate Pipeline", des
                           <div className="flex items-center space-x-1">
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Link href={`applications/${candidate.id}`}>
+                                <Link href={`applications/${candidate?.id}`}>
                                   <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                                     <Eye className="h-4 w-4" />
                                   </Button>

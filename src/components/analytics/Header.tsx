@@ -1,14 +1,15 @@
 import { Award, GitBranch, TrendingUp, Users } from "lucide-react"
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { HeaderAnalyticsData } from "@/lib/applicationAnalytics/services";
 
-const Header = ({headerData}) => {
+const Header = ({headerData }: {headerData: HeaderAnalyticsData}) => {
       // Mock data for the dashboard
   const analyticsData = {
-    totalApplicants: headerData.totalApplicants,
-    avgGithubContributions: headerData.avgGithubContributions,
-    avgHackathons: headerData.avgHackathons,
-    devsportParticipation: headerData.devsportParticipation
+    totalApplicants: headerData?.totalApplicants,
+    avgGithubContributions: headerData?.avgGithubContributions,
+    avgHackathons: headerData?.avgHackathons,
+    devsportParticipation: headerData?.devsportParticipation
   };
 
 
@@ -20,7 +21,7 @@ const Header = ({headerData}) => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <h1 className="text-2xl font-bold text-gray-900">Applicant Analytics</h1>
-              <span className="text-sm text-gray-500">{headerData.jobTitle}</span>
+              <span className="text-sm text-gray-500">{headerData?.jobTitle}</span>
             </div>
             <Link href="/dashboard">
               <Button
@@ -53,7 +54,7 @@ const Header = ({headerData}) => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Avg. GitHub Contributions</p>
-                <p className="text-3xl font-bold text-gray-900">{analyticsData.avgGithubContributions.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-gray-900">{analyticsData.avgGithubContributions?.toLocaleString()}</p>
                 <p className="text-sm text-gray-500">Win Rate: 0%</p>
               </div>
               <div className="p-3 bg-green-50 rounded-full">

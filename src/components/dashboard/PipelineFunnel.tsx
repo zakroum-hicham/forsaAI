@@ -310,7 +310,7 @@ export default function PipelineFunnel({
                     Conversion Rate:
                   </span>
                   <p className="text-blue-800 dark:text-blue-200">
-                    {selectedJob?.stages.length > 1 && selectedJob?.stages[0].count > 0
+                    {selectedJob?.stages && selectedJob?.stages.length > 1 && selectedJob?.stages[0].count > 0
                       ? ((selectedJob?.stages[selectedJob?.stages.length - 1].count / selectedJob?.stages[0].count) * 100).toFixed(1)
                       : 0}%
                     of candidates reach final stage
@@ -322,7 +322,7 @@ export default function PipelineFunnel({
                   </span>
                   <p className="text-blue-800 dark:text-blue-200">
                     {/* check if enhancedPipelineData.stage && (fixes the problem)  */}
-                    {enhancedPipelineData.stage && enhancedPipelineData?.reduce((max, stage) => 
+                    {enhancedPipelineData && enhancedPipelineData?.reduce((max, stage) => 
                       (stage.dropoffRate || 0) > (max.dropoffRate || 0) ? stage : max, 
                       enhancedPipelineData[0]
                     ).stage} stage

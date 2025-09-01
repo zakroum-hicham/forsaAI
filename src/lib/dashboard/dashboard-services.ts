@@ -1,3 +1,4 @@
+import { Job } from '@prisma/client';
 import prisma from '../prisma';
 import type { 
   DashboardMetrics, 
@@ -28,7 +29,7 @@ function calculateUrgencyScore(endPostingDate: Date | null): number {
 /**
  * Calculate AI match score (placeholder - implement your AI logic here)
  */
-function calculateAIMatchScore(job: any, applicationCount: number): number {
+function calculateAIMatchScore(job : Job, applicationCount: number): number {
   // Placeholder AI scoring logic - replace with your actual AI implementation
   let score = 50;
   
@@ -227,8 +228,7 @@ export async function getAIRecommendations(userId: string): Promise<AIRecommenda
     let score = 70;
     if (app.linkedinUrl) score += 10;
     if (app.portfolioUrl) score += 10;
-    if (app.university) score += 5;
-    if (app.githubConnected) score += 5;
+    if (app.institution) score += 5;
 
     if (score >= 85) {
       recommendations.push({

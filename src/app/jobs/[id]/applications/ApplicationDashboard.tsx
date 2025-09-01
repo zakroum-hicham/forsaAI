@@ -5,8 +5,9 @@ import Overview from '@/components/analytics/Overview';
 import Candidates from '@/components/analytics/Candidates';
 import GitHub from '@/components/analytics/Github';
 import Header from '@/components/analytics/Header';
+import { CandidateAnalyticsData, HeaderAnalyticsData } from '@/lib/applicationAnalytics/services';
 
-const ApplicantAnalyticsDashboard = ({ headerData , candidateData,topCandidates }) => {
+const ApplicantAnalyticsDashboard = ({ headerData , candidateData,topCandidates }: { headerData: HeaderAnalyticsData; candidateData: CandidateAnalyticsData[]; topCandidates: CandidateAnalyticsData[]; }) => {
   const [selectedTab, setSelectedTab] = useState('overview');
 
   const tabs = [

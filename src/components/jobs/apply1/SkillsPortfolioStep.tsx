@@ -1,13 +1,8 @@
+import { StepPropsType } from "@/app/public/jobs/[id]/apply/JobApply";
 import { FileText, Globe, Linkedin } from "lucide-react";
 
-type Props = {
-    formData: any;
-    updateFormData: (field: string, value: any) => void;
-    errors: string[];
-    isNavigating: boolean;
-};
 
-const SkillsPortfolioStep = ({ formData, updateFormData, errors, isNavigating }: Props) => {
+const SkillsPortfolioStep = ({ formData, updateFormData, errors, isNavigating } : StepPropsType) => {
   const skillsList = [
     "JavaScript", "Python", "Java", "PHP", "React", "Angular", "Vue.js", 
     "Node.js", "Express", "Django", "Flask", "HTML/CSS", "SQL", "MongoDB", 

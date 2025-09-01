@@ -3,9 +3,11 @@ import { GetJob } from '@/lib/jobs/get-job';
 import JobDetails from '@/components/jobs/JobDetails';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import Link from 'next/link';
+import { Job } from '@prisma/client';
 
-export default async function JobPage({ params }: { params: { id: string } }) {
-  const job = await GetJob(params.id);
+export default async function JobPage({ params } : { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const job : Job | null = await GetJob(id);
   if (!job) return notFound();
 
   return (

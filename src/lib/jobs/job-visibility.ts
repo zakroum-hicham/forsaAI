@@ -19,7 +19,7 @@ export default async function ToggleJobVisibility(jobId: string) {
     });
 
     return updatedJob;
-  } catch (error) {
-    throw new Error("Error toggling job visibility: " + error.message);
+  } catch (error: unknown) {
+    throw new Error("Error toggling job visibility");
   }
 }

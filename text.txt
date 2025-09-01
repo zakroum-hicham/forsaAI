@@ -1,0 +1,17 @@
+npx tsc --noEmit
+
+
+Found 54 errors in 11 files.
+
+Errors  Files
+     3  src/app/api/apply/route.ts:77
+     6  src/app/public/jobs/[id]/apply/JobApply.tsx:147
+    16  src/components/analytics/Candidates.tsx:36
+     2  src/components/dashboard/JobList.tsx:309
+     5  src/components/dashboard/PipelineFunnel.tsx:313
+     4  src/components/jobs/apply1/EducationExperienceStep.tsx:4
+     5  src/components/jobs/apply1/MotivationStep.tsx:3
+     4  src/components/jobs/apply1/PersonalInfoStep.tsx:4
+     4  src/components/jobs/apply1/SkillsPortfolioStep.tsx:4
+     1  src/components/jobs/JobForm.tsx:184
+     4  src/lib/applicationAnalytics/services.ts:78

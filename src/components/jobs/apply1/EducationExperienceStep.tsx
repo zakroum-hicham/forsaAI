@@ -1,13 +1,8 @@
+import { StepPropsType } from "@/app/public/jobs/[id]/apply/JobApply";
 import { Calendar, GraduationCap } from "lucide-react";
 
-type Props = {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
-  errors: string[];
-  isNavigating: boolean;
-};
 
-const EducationExperienceStep = ({ formData, updateFormData, errors, isNavigating }: Props) => {
+const EducationExperienceStep = ({ formData, updateFormData, errors, isNavigating } : StepPropsType) => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => currentYear + 2 - i);
   
@@ -36,8 +31,8 @@ const EducationExperienceStep = ({ formData, updateFormData, errors, isNavigatin
             <option value="">Select your education level</option>
             <option value="HIGH_SCHOOL">High School Diploma</option>
             <option value="ASSOCIATE">Associate Degree</option>
-            <option value="BACHELOR">Bachelor's Degree</option>
-            <option value="MASTER">Master's Degree</option>
+            <option value="BACHELOR">Bachelor&apos;s Degree</option>
+            <option value="MASTER">Master&apos;s Degree</option>
             <option value="PHD">PhD</option>
             <option value="OTHER">Other</option>
           </select>

@@ -20,9 +20,10 @@ export type RegisterInput = z.infer<typeof registerSchema>;
 /////////////////////////////////////////////////// JOB APPLY FORM SCHEMA
 // Personal Info Schema
 export const personalInfoSchema = z.object({
+  jobId: z.string().uuid(),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Please enter a valid email address"),
+  email: z.string().min(1,"email is required").email("Please enter a valid email address"),
   phone: z
   .string()
   .min(1, "Phone number is required")
@@ -36,8 +37,8 @@ export const personalInfoSchema = z.object({
 
 // Education & Experience Schema
 export const educationExperienceSchema = z.object({
-  educationLevel: z.string().min(1, "Education level is required"),
-  experience: z.string().min(1, "Experience level is required")
+  educationLevel: z.enum(["HIGH_SCHOOL", "ASSOCIATE", "MASTER", "PHD","BACHELOR","OTHER"]),
+  experience: z.enum(["ZERO", "ONE_TWO", "THREE_FIVE", "SIX_TEN", "TEN_PLUS"])
 });
 
 // Skills & Portfolio Schema
@@ -83,4 +84,4 @@ export const jobApplicationSchema = z.object({
   terms: motivationSchema.shape.terms
 });
 
-
+export type JobApplicationFormType = z.infer<typeof jobApplicationSchema>;

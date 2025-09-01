@@ -237,7 +237,7 @@ function ActivitySummary({ activities }: { activities: ActivityItem[] }) {
             {todayActivities.length}
           </div>
           <div className="text-xs text-gray-600 dark:text-gray-400">
-            Today's Activity
+            Today&apos;s Activity
           </div>
         </div>
         <div className="text-center">

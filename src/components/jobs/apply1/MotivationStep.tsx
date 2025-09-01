@@ -1,22 +1,18 @@
-type Props = {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
-  errors: string[];
-  isNavigating: boolean;
-  job: any;
-};
+import { StepPropsType } from "@/app/public/jobs/[id]/apply/JobApply";
+import { Job } from "@prisma/client";
 
-const MotivationStep = ({ formData, updateFormData, errors, isNavigating, job }: Props) => {
+
+const MotivationStep = ({ formData, updateFormData, errors, isNavigating, job } :StepPropsType &{job: Job}) => {
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-gray-900">Final Steps</h3>
-        <p className="text-sm text-gray-600">Tell us why you're interested in this position</p>
+        <p className="text-sm text-gray-600">Tell us why you&apos;re interested in this position</p>
       </div>
       
       <div>
         <label htmlFor="motivation" className="block text-sm font-medium text-gray-700 mb-1">
-          Why are you interested in this position at {job.company}? *
+          Why are you interested in this position at {"this Company"}? *
         </label>
         <textarea
           id="motivation"

@@ -14,29 +14,14 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
+import { Job } from '@prisma/client';
 
-interface Job {
-  id?: string;
-  title: string;
-  type: string;
-  status: string;
-  location?: string;
-  postingDate: Date;
-  endPostingDate?: Date;
-  startDate?: Date;
-  endDate?: Date;
-  salaryMin?: number;
-  salaryMax?: number;
-  description: string;
-  requirements: string;
-}
 
-interface JobFormProps {
+type JobFormProps = {
   mode: 'create' | 'edit';
+} & {
   job?: Job;
-  onSuccess?: (job: Job) => void;
-}
-
+};
 const JobForm = ({ mode = 'create', job }: JobFormProps) => {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -194,9 +179,11 @@ Additional Information:
         const redirectPath = mode === 'create' ? `/jobs/${responseJob.id}` : `/jobs/${job?.id}`;
         router.push(redirectPath);
       }, 1500);
-    } catch (err: any) {
-      console.error(`Job ${mode} failed:`, err);
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err:unknown) {
+      if (err instanceof Error){
+        console.error(`Job ${mode} failed:`, err);
+        setError(err.message || 'An unexpected error occurred');
+      }
     } finally {
       setIsSubmitting(false);
     }

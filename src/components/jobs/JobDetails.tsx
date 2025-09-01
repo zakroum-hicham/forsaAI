@@ -14,23 +14,11 @@ import { deleteJob } from '@/lib/jobs/delete-job';
 import { redirect } from 'next/navigation';
 import toggleJobVisibility from '@/lib/jobs/job-visibility';
 import ToggleJobVisibility from '@/lib/jobs/job-visibility';
+import { Job } from '@prisma/client';
 
 // Mock types for demo
 type JobType = 'INTERNSHIP' | 'FULL_TIME' | 'PART_TIME' | 'CONTRACT';
 type JobStatus = 'DRAFT' | 'ACTIVE' | 'ARCHIVED';
-
-interface Job {
-  title: string;
-  type: JobType;
-  status: JobStatus;
-  location?: string;
-  postingDate: Date;
-  endPostingDate?: Date;
-  salaryMin?: number;
-  salaryMax?: number;
-  description: string;
-  requirements: string;
-}
 
 // Simple date formatter to replace date-fns
 const formatDate = (date: Date) => {
@@ -41,7 +29,7 @@ const formatDate = (date: Date) => {
   });
 };
 
-export default function JobDetails({ job}: { job?: Job }) {
+export default function JobDetails({ job}: { job: Job }) {
   const [loading, setLoading] = useState<boolean>(false);
    const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [copied, setCopied] = useState(false);

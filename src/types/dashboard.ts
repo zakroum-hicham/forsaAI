@@ -50,7 +50,7 @@ export interface AIRecommendation {
   priority: 'high' | 'medium' | 'low';
   actionLabel?: string;
   actionUrl?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string>;
 }
 
 export interface ActivityItem {

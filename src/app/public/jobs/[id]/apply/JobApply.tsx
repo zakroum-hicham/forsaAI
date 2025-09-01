@@ -8,44 +8,49 @@ import PersonalInfoStep from '@/components/jobs/apply1/PersonalInfoStep';
 import EducationExperienceStep from '@/components/jobs/apply1/EducationExperienceStep';
 import SkillsPortfolioStep from '@/components/jobs/apply1/SkillsPortfolioStep';
 import MotivationStep from '@/components/jobs/apply1/MotivationStep';
-import { personalInfoSchema,educationExperienceSchema,skillsPortfolioSchema,motivationSchema } from '@/lib/validations';
+import { personalInfoSchema,educationExperienceSchema,skillsPortfolioSchema,motivationSchema, JobApplicationFormType } from '@/lib/validations';
 import z from 'zod';
+import { Job } from '@prisma/client';
 
-type Props = {
-  job: any;
-  session: any;
-};
 
 type StepErrors = {
   [key: number]: string[];
 };
-export default function JobApplicationForm({ job, session }: Props) {
+
+export type StepPropsType = {
+  formData : JobApplicationFormType,
+  updateFormData: (field: keyof JobApplicationFormType, value: JobApplicationFormType[keyof JobApplicationFormType]) => void,
+  errors: string[],
+  isNavigating: boolean
+}
+export default function JobApplicationForm({ job, session } :{ job: Job; session: SessionType }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [stepErrors, setStepErrors] = useState<StepErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState({
     // Personal Info
+    jobId: job.id,
     firstName: '',
     lastName: '',
-    email: session?.user?.email,
+    email: session?.user?.email ?? '',
     phone: '',
     city: '',
     
     // Education & Experience
-    educationLevel: '',
+    educationLevel: '' as JobApplicationFormType['educationLevel'],
     institution: '',
     fieldOfStudy: '',
     graduationYear: '',
-    experience: '',
-    
+    experience: '' as JobApplicationFormType['experience'],
+
     // Skills & Portfolio
     skills: [],
     linkedin: '',
     portfolio: '',
-    resume: null,
+    resume: new File([], ''), // this could be a bug in future
     
     // Motivation
     motivation: '',
@@ -61,8 +66,8 @@ export default function JobApplicationForm({ job, session }: Props) {
   ]);
 
   // Form validation
-  
-  const validateStep = (stepId: number, formData: any) => {
+
+  const validateStep = (stepId: number, formData: JobApplicationFormType) => {
     try {
       switch (stepId) {
         case 1:
@@ -87,8 +92,8 @@ export default function JobApplicationForm({ job, session }: Props) {
     }
   };
 
-  const updateFormData = (field: any, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  const updateFormData = (field: keyof JobApplicationFormType, value: JobApplicationFormType[keyof JobApplicationFormType]) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear errors for this step when user makes changes
     if (stepErrors[currentStep]) {
       setStepErrors(prev => ({ ...prev, [currentStep]: [] }));
@@ -141,13 +146,13 @@ export default function JobApplicationForm({ job, session }: Props) {
 
   const handleSubmit = async () => {
     // Final validation of all steps
-    let allErrors : any = {};
+    const allErrors : StepErrors = {};
     let hasErrors = false;
 
     for (let i = 1; i <= 4; i++) {
       const errors = validateStep(i, formData);
       if (errors.length > 0) {
-        allErrors[i] = errors;
+        allErrors[i] = errors as string[];
         hasErrors = true;
       }
     }
@@ -173,7 +178,6 @@ export default function JobApplicationForm({ job, session }: Props) {
     try {
       // Create FormData object to handle file upload
       const submitData = new FormData();
-      submitData.append('jobId', job.id);
       
       // Append all form fields
       Object.keys(formData).forEach(key => {
@@ -182,7 +186,7 @@ export default function JobApplicationForm({ job, session }: Props) {
         } else if (key === 'resume' && formData[key]) {
           submitData.append(key, formData[key]);
         } else {
-          submitData.append(key, formData[key]);
+          submitData.append(key, formData[key as keyof JobApplicationFormType] as string);
         }
       });
       const response = await fetch('/api/apply', {
@@ -204,22 +208,22 @@ export default function JobApplicationForm({ job, session }: Props) {
           const fieldErrors: Record<number, string[]> = {};
           const errorMessages: string[] = [];
 
-          Object.entries(result.errors).forEach(([field, error]: [any, any]) => {
+          Object.entries(result.errors).forEach(([field, error]) => {
             errorMessages.push(`${error}`);
             
             // Map API field errors to step errors
             if (['firstName', 'lastName', 'email', 'phone', 'city'].includes(field)) {
               fieldErrors[1] = fieldErrors[1] || [];
-              fieldErrors[1].push(error);
+              fieldErrors[1].push(error as string);
             } else if (['educationLevel', 'institution', 'fieldOfStudy', 'graduationYear', 'experience'].includes(field)) {
               fieldErrors[2] = fieldErrors[2] || [];
-              fieldErrors[2].push(error);
+              fieldErrors[2].push(error as string);
             } else if (['skills', 'linkedin', 'portfolio', 'resume'].includes(field)) {
               fieldErrors[3] = fieldErrors[3] || [];
-              fieldErrors[3].push(error);
+              fieldErrors[3].push(error as string);
             } else if (['motivation', 'availability', 'terms'].includes(field)) {
               fieldErrors[4] = fieldErrors[4] || [];
-              fieldErrors[4].push(error);
+              fieldErrors[4].push(error as string);
             }
           });
           
@@ -257,8 +261,8 @@ export default function JobApplicationForm({ job, session }: Props) {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h2>
           <p className="text-gray-600 mb-4">
-            Thank you for applying to {job.title} at {job.company || 'this company'}. 
-            We'll review your application and get back to you soon.
+            Thank you for applying to {job.title} at {'this company'}. 
+            We&apos;ll review your application and get back to you soon.
           </p>
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <Clock className="w-4 h-4" />
@@ -270,7 +274,7 @@ export default function JobApplicationForm({ job, session }: Props) {
   }
 
   const renderStep = () => {
-    const stepProps = {
+    const stepProps : StepPropsType = {
       formData,
       updateFormData,
       errors: stepErrors[currentStep]?.flat() || [],
@@ -295,7 +299,7 @@ export default function JobApplicationForm({ job, session }: Props) {
             <Briefcase className="w-8 h-8 text-blue-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-1">{job.title}</h1>
-          <p className="text-gray-600">{job.company || 'Company Name'}</p>
+          <p className="text-gray-600">{'Company Name'}</p>
           <div className="flex justify-center gap-2 mt-2">
             <span className="px-3 py-1 bg-gray-100 rounded-full text-sm flex items-center gap-1">
               <MapPin className="w-3 h-3" />

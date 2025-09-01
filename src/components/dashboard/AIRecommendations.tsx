@@ -343,7 +343,7 @@ export default function AIRecommendations({ recommendations, loading }: AIRecomm
                 💡 Pro Tip
               </h4>
               <p className="text-sm text-green-700 dark:text-green-200">
-                The AI learns from your hiring decisions. Mark candidates as 'hired' or 'rejected' 
+                The AI learns from your hiring decisions. Mark candidates as &quot;hired&quot; or &quot;rejected&quot; 
                 to improve future recommendations and matching accuracy.
               </p>
             </div>

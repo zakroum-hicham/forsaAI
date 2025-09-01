@@ -1,16 +1,8 @@
-import { getCandidateProfile } from "@/lib/applicationAnalytics/services";
+import { CandidateProfileDataType, getCandidateProfile } from "@/lib/applicationAnalytics/services";
 import CandidateProfile from "./CandidateProfile";
 
-interface PageProps {
-  params: {
-    candidate_id: string;
-    id: string;
-    [key: string]: any;
-  };
-}
-
-const Page = async({ params }: PageProps) => {
-  const {id, candidate_id} = await params
+const Page = async({ params }: { params: Promise<{ id: string, candidate_id: string }> }) => {
+  const { id, candidate_id } = await params
   const CandidateProfileData = await getCandidateProfile(id, candidate_id)
   // console.log(CandidateProfileData)
   

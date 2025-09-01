@@ -22,15 +22,12 @@ import {
   Trophy,
   Briefcase,
   Clock,
-  Upload,
-  Move3DIcon
 } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CandidateProfileData } from '@/lib/applicationAnalytics/services';
+import { CandidateProfileDataType } from '@/lib/applicationAnalytics/services';
 
 
-const CandidateProfile = ({data }:{data: CandidateProfileData}) => {
+const CandidateProfile = ({data }:{data: CandidateProfileDataType}) => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const router = useRouter();
@@ -51,7 +48,7 @@ const CandidateProfile = ({data }:{data: CandidateProfileData}) => {
   // );
   // const repositories = data?.github?.topRepositories;
 
-  const totalCountLanguages = Object.values(data?.github?.languageData).length;
+  const totalCountLanguages = Object.values(data?.github?.languageData ?? {}).length;
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -60,7 +57,7 @@ const CandidateProfile = ({data }:{data: CandidateProfileData}) => {
           <CardHeader className="pb-4">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
               <Avatar className="w-16 h-16 ring-2 ring-gray-100">
-                <AvatarImage src={data?.github?.avatarUrl} alt={data?.github?.name} />
+                <AvatarImage src={data?.github?.avatarUrl ?? ''} alt={data?.github?.name} />
                 <AvatarFallback className="bg-red-500 text-white text-xl font-semibold">{data?.github?.name?.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex-1 space-y-2">
@@ -76,7 +73,7 @@ const CandidateProfile = ({data }:{data: CandidateProfileData}) => {
                     <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
                       Applied
                     </Badge>
-                    <span className="text-sm text-gray-500">on {new Date(data?.appliedOn).toLocaleDateString()}</span>
+                    <span className="text-sm text-gray-500">on {new Date(data?.appliedOn ?? '').toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
@@ -191,7 +188,7 @@ const CandidateProfile = ({data }:{data: CandidateProfileData}) => {
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
                   <Avatar className="w-12 h-12">
-                    <AvatarImage src={data?.github?.avatarUrl} alt={data?.github?.login} />
+                    <AvatarImage src={data?.github?.avatarUrl ?? ''} alt={data?.github?.login} />
                     <AvatarFallback className="bg-red-500 text-white">{data?.github?.login?.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
@@ -262,7 +259,7 @@ const CandidateProfile = ({data }:{data: CandidateProfileData}) => {
                               value={Math.round((langData.count / totalCountLanguages) * 100)}
                               max={100}
                               className="h-2"
-                              style={{ '--progress-color': langData.color }}
+                              style={{ '--progress-color': langData.color ?? '' }}
                               indicatorColor="bg-[var(--progress-color)]"
                             />   
                           </div>
@@ -330,7 +327,7 @@ const CandidateProfile = ({data }:{data: CandidateProfileData}) => {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <a
-                                href={repo.url}
+                                href={repo.url ?? ''}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors group-hover:text-blue-600"
@@ -349,7 +346,7 @@ const CandidateProfile = ({data }:{data: CandidateProfileData}) => {
                             <div className="flex items-center gap-2">
                               <div
                                 className="w-3 h-3 rounded-full"
-                                style={{ backgroundColor: repo.primaryLanguage.color }}
+                                style={{ backgroundColor: repo.primaryLanguage.color ??''}}
                               />
                               <span className="text-gray-700 font-medium">{repo.primaryLanguage.name}</span>
                             </div>
@@ -385,7 +382,7 @@ const CandidateProfile = ({data }:{data: CandidateProfileData}) => {
                                 >
                                   <span
                                     className="w-2 h-2 rounded-full"
-                                    style={{ backgroundColor: node.color }}
+                                    style={{ backgroundColor: node.color ??''}}
                                   />
                                   {node.name}
                                 </span>

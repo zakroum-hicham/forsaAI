@@ -3,19 +3,11 @@ import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 
 
-interface EditJobPageProps {
-  params: {
-    id: string;
-  };
-}
+export default async function EditJobPage({ params } : { params: Promise<{ id: string }> }) {
 
-
-export default async function EditJobPage({ params }: EditJobPageProps) {
-  
-  
-  params = await params
+  const {id} = await params
   const job = await prisma.job.findUnique({
-    where: { id: params.id }
+    where: { id: id }
   });
   if (!job) return notFound();
 

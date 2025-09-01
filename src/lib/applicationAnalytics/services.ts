@@ -1,14 +1,16 @@
+import { GitHubProfile, JobApplication, User } from '@prisma/client';
 import prisma from '../prisma';
+import { ContributionCalendar, ContributionDay, ContributionsCollection, ContributionWeek, PullRequests, Repositories, RepositoryNode } from '@/types/graphql';
 
-type HeaderAnalyticsData = {
+export type HeaderAnalyticsData = {
   jobTitle: string;
   totalApplicants: number;
   avgGithubContributions: number;
   avgHackathons: number;
   devsportParticipation: number;
-};
+} | null;
 
-type CandidateAnalyticsData = {
+export type CandidateAnalyticsData = {
   id: string;
   avatarUrl: string | null;
   name: string | null;
@@ -21,41 +23,50 @@ type CandidateAnalyticsData = {
   experience: number | null;
   currentRole: string | null;
   status: string | null;
-};
+} | null;
 
-export type CandidateProfileData = {
-  email : string | null;
-  firstName: string | null;
-  lastName : string | null;
-  institution: string | null;
-  fieldOfStudy: string | null;
-  graduationYear: number | null;
-  linkedinUrl : string | null;
-  portfolioUrl : string | null;
-  whyInterested : string | null;
-  appliedOn : string;
+
+export type CandidateProfileDataType = {
+  email : User['email'];
+  firstName: JobApplication['firstName'] | null;
+  lastName : JobApplication['lastName'] | null;
+  institution: JobApplication['institution'] | null;
+  fieldOfStudy: JobApplication['fieldOfStudy'] | null;
+  graduationYear: JobApplication['graduationYear'] | null;
+  linkedinUrl : JobApplication['linkedinUrl'] | null;
+  portfolioUrl : JobApplication['portfolioUrl'] | null;
+  whyInterested : JobApplication['whyInterested'] | null;
+  appliedOn : JobApplication['createdAt'] | undefined;
 
   github: {
-    name : string,
-    login: string ,
-    avatarUrl: string,
-    bioHTML: string | null,
-    followers: number | null,
-    following: number | null,
-    url: string | null,
-    location: string | null,
-    githubCreatedAt: string,
+    name: GitHubProfile['name'],
+    login: GitHubProfile['login'],
+    avatarUrl: GitHubProfile['avatarUrl'],
+    bioHTML: GitHubProfile['bioHTML'],
+    followers: GitHubProfile['followersCount'],
+    following: GitHubProfile['followingCount'],
+    url: GitHubProfile['url'],
+    location: GitHubProfile['location'],
+    githubCreatedAt: GitHubProfile['githubCreatedAt'],
 
     repositoriesCount: number | null,
     totalContributions: number | null,
     longestStreak : number | null,
     languageData: { [key: string]: { count: number; color: string | null } },
-    contributionStats: any,
+    contributionStats : {
+      mostActiveDay: string,
+      weeklyAverage: string,
+      contributionsPerDay: string,
+      activeDaysPerWeek: string,
+      currentStreak : number,
+      pullRequests: number,
+    },
 
-    repositories: any | [],
+    repositories: Repositories["nodes"],
     } | null;
 } | null;
-export async function getHeaderAnalytics(jobId: string): Promise<HeaderAnalyticsData | null> {
+
+export async function getHeaderAnalytics(jobId: string): Promise<HeaderAnalyticsData> {
   // Get job and related applications
   const job = await prisma.job.findUnique({
     where: { id: jobId },
@@ -71,11 +82,11 @@ export async function getHeaderAnalytics(jobId: string): Promise<HeaderAnalytics
   const totalApplicants = applications.length;
   ////////////////////////////   for now this is incorrect
   // Calculate averages
-  const githubContributions = applications.map(app => (app.githubConnected ? 1 : 0));
+  const githubContributions = applications.map(app => (true ? 1 : 0));
   const hackathonCounts = applications.map(app => {
-    return app.devpostUsername ? 1 : 0;
+    return true ? 1 : 0;
   });
-  const devsportParticipation = applications.filter(app => app.devpostUsername).length;
+  const devsportParticipation = applications.filter(app => true).length;
 
   const avgGithubContributions = Math.round(
     githubContributions.reduce((a, b) => a + b, 0 as number) / Math.max(totalApplicants, 1) * 1000 // Simulated logic
@@ -100,7 +111,7 @@ export async function getHeaderAnalytics(jobId: string): Promise<HeaderAnalytics
 
 
 
-export async function getCandidateAnalytics(jobId: string): Promise<CandidateAnalyticsData | null> {
+export async function getCandidateAnalytics(jobId: string): Promise<CandidateAnalyticsData[]> {
   // Fetch all job applications for the given jobId
   const jobApplications = await prisma.jobApplication.findMany({
     where: { jobId },
@@ -115,7 +126,7 @@ export async function getCandidateAnalytics(jobId: string): Promise<CandidateAna
 
   // If no job applications exist, return null
   if (jobApplications.length === 0) {
-    return null;
+    return [];
   }
 
   // Map through the job applications to gather candidate analytics data
@@ -129,44 +140,48 @@ export async function getCandidateAnalytics(jobId: string): Promise<CandidateAna
       name: githubProfile?.name ?? null,
       email: user.email,
       location: githubProfile?.location ?? null,
-      overallScore: calculateOverallScore(githubProfile, app),
-      githubScore: calculateGithubScore(githubProfile),
-      contributions: githubProfile?.contributionsCalendar?.totalContributions ?? 0,
+      // overallScore: calculateOverallScore(githubProfile, app),
+      // githubScore: calculateGithubScore(githubProfile),
+      overallScore: 0,
+      githubScore: 0,
+      contributions: (githubProfile?.contributionsCollection as ContributionsCollection).contributionCalendar.totalContributions ?? 0,
       hackathonsScore: 0,  // Assuming no hackathons data for now, can be expanded
       experience: 0,  // Assuming no experience data for now, can be expanded
       currentRole: user.role,
-      status: app.githubConnected ? 'Connected' : 'Not Connected', // Example of status based on GitHub connection
+      status: true ? 'Connected' : 'Not Connected', // Example of status based on GitHub connection
     };
   });
-  return candidateAnalytics.length > 0 ? candidateAnalytics : null;
+  return candidateAnalytics.length > 0 ? candidateAnalytics : [];
 }
 
 // Example function to calculate overall score based on some criteria
-function calculateOverallScore(githubProfile: any, application: any): number {
-  // Placeholder logic for calculating score, can be expanded based on your needs
-  let score = 0;
-  if (githubProfile) {
-    score += githubProfile.followersCount * 0.1;  // Example multiplier for followers count
-    score += githubProfile.contributionsTotal ?? 0;  // Example: Add total contributions
-  }
-  score += application.githubConnected ? 10 : 0;  // Add a score boost if GitHub is connected
+// function calculateOverallScore(githubProfile: {
+//   contributionsTotal: number; name: string; id: string; location: string | null; createdAt: Date; updatedAt: Date; userId: string; accessToken: string; githubCreatedAt: Date | null; login: string; url: string | null; bioHTML: string | null; avatarUrl: string | null; followersCount: number; followingCount: number; contributionsCollection: JsonValue | null; repositories: JsonValue | null; Contributions: JsonValue | null; pullRequests: JsonValue | null; issues: JsonValue | null; CodeReviewActivity: JsonValue | null; 
+// } | null, application: { user: { githubProfile: { name: string; id: string; location: string | null; createdAt: Date; updatedAt: Date; userId: string; accessToken: string; githubCreatedAt: Date | null; login: string; url: string | null; bioHTML: string | null; avatarUrl: string | null; followersCount: number; followingCount: number; contributionsCollection: JsonValue | null; repositories: JsonValue | null; Contributions: JsonValue | null; pullRequests: JsonValue | null; issues: JsonValue | null; CodeReviewActivity: JsonValue | null; } | null; } & { name: string | null; id: string; createdAt: Date; updatedAt: Date; firstName: string; lastName: string; email: string; emailVerified: Date | null; company: string | null; password: string | null; image: string | null; role: string; githubProfileId: string | null; }; } & { id: string; createdAt: Date; userId: string; firstName: string; lastName: string; email: string; jobId: string; phone: string; city: string; educationLevel: $Enums.EducationLevel; institution: string | null; fieldOfStudy: string | null; graduationYear: string | null; experience: $Enums.ExperienceEnum; skills: string[]; linkedinUrl: string | null; portfolioUrl: string | null; whyInterested: string; termsAccepted: boolean; }): number {
+//   // Placeholder logic for calculating score, can be expanded based on your needs
+//   let score = 0;
+//   if (githubProfile) {
+//     score += githubProfile.followersCount * 0.1;  // Example multiplier for followers count
+//     score += githubProfile.contributionsTotal ?? 0;  // Example: Add total contributions
+//   }
+//   score += true ? 10 : 0;  // Add a score boost if GitHub is connected
 
-  return score;
-}
+//   return score;
+// }
 
 // Example function to calculate GitHub score (just an example logic)
-function calculateGithubScore(githubProfile: any): number {
-  let score = 0;
-  if (githubProfile) {
-    score += githubProfile.followersCount * 0.1;  // Example multiplier for followers count
-    score += githubProfile.repositoriesCount * 0.05;  // Example multiplier for repositories
-  }
-  return score;
-}
+// function calculateGithubScore(githubProfile): number {
+//   let score = 0;
+//   if (githubProfile) {
+//     score += githubProfile.followersCount * 0.1;  // Example multiplier for followers count
+//     score += githubProfile.repositoriesCount * 0.05;  // Example multiplier for repositories
+//   }
+//   return score;
+// }
 
 
-function calculateLongestStreak(contributionCalendar: any) {
-  const days = contributionCalendar.weeks.flatMap((week :any) => week.contributionDays);
+function calculateLongestStreak(contributionCalendar: ContributionCalendar) {
+  const days = contributionCalendar.weeks.flatMap((week: ContributionWeek) => week.contributionDays);
 
   let currentStreak = 0;
   let longestStreak = 0;
@@ -184,10 +199,10 @@ function calculateLongestStreak(contributionCalendar: any) {
 }
 
 
-function extractLanguageData(repositories: any) {
-  const languageData = {};
+function extractLanguageData(nodes: RepositoryNode[]) {
+  const languageData : Record<string, { count: number; color: string | null }> = {};
 
-  for (const repo of repositories) {
+  for (const repo of nodes) {
     if (!repo.languages) continue;
 
     for (const edge of repo.languages.edges) {
@@ -205,12 +220,12 @@ function extractLanguageData(repositories: any) {
 }
 
 
-function extractContributionStats(contributionCalendar: any, pullRequestsCount: number) {
+function extractContributionStats(contributionCalendar: { totalContributions: number; weeks: ContributionWeek[]; }, pullRequestsCount: number) {
   const weeks = contributionCalendar.weeks;
-  const allDays = weeks.flatMap((w: any) => w.contributionDays);
+  const allDays = weeks.flatMap((w: ContributionWeek) => w.contributionDays);
 
   // Most Active Day
-  const mostActive = allDays.reduce((a: any, b: any) =>
+  const mostActive = allDays.reduce((a: ContributionDay, b: ContributionDay) =>
     b.contributionCount > a.contributionCount ? b : a
   );
 
@@ -220,7 +235,7 @@ function extractContributionStats(contributionCalendar: any, pullRequestsCount: 
   // Metrics
   const weeklyAverage = totalContributions / numberOfWeeks;
   const contributionsPerDay = totalContributions / numberOfDays;
-  const activeDays = allDays.filter((d: any) => d.contributionCount > 0).length;
+  const activeDays = allDays.filter((d: { contributionCount: number; }) => d.contributionCount > 0).length;
   const activeDaysPerWeek = activeDays / numberOfWeeks;
 
   // Current streak
@@ -257,7 +272,11 @@ export async function getCandidateProfile(jobId: string, candidateId: string) {
 
   const jobApplication = user?.JobApplication.find(app => app.jobId === jobId) || null;
   // console.log(jobApplication)
-  const candidateProfile : CandidateProfileData = {
+  const githubProfile = user.githubProfile;
+  const repositories = githubProfile?.repositories as Repositories;
+  const contributionsCollection = githubProfile?.contributionsCollection as ContributionsCollection;
+  const pullRequests = githubProfile?.pullRequests as PullRequests;
+  const candidateProfile : CandidateProfileDataType = {
     email: user.email,
     firstName: jobApplication?.firstName || null,
     lastName: jobApplication?.lastName || null,
@@ -267,27 +286,27 @@ export async function getCandidateProfile(jobId: string, candidateId: string) {
     linkedinUrl: jobApplication?.linkedinUrl || null,
     portfolioUrl: jobApplication?.portfolioUrl || null,
     whyInterested: jobApplication?.whyInterested || null,
-    appliedOn: jobApplication?.createdAt,
+    appliedOn: jobApplication?.createdAt || undefined,
 
-    github: user.githubProfile
+    github: githubProfile
       ? {
-          name : user.githubProfile.name,
-          login: user.githubProfile.login,
-          avatarUrl: user.githubProfile.avatarUrl,
-          bioHTML: user.githubProfile.bioHTML,
-          followers: user.githubProfile.followersCount,
-          following: user.githubProfile.followingCount,
-          url: user.githubProfile.url,
-          location: user.githubProfile.location,
-          githubCreatedAt: user.githubProfile.githubCreatedAt,
+          name: githubProfile.name,
+          login: githubProfile.login,
+          avatarUrl: githubProfile.avatarUrl,
+          bioHTML: githubProfile.bioHTML,
+          followers: githubProfile.followersCount,
+          following: githubProfile.followingCount,
+          url: githubProfile.url,
+          location: githubProfile.location,
+          githubCreatedAt: githubProfile.githubCreatedAt,
 
-          repositoriesCount: user.githubProfile.repositories.totalCount,
-          totalContributions: user.githubProfile.contributionsCollection.contributionCalendar.totalContributions,
-          longestStreak : calculateLongestStreak(user.githubProfile.contributionsCollection.contributionCalendar),
-          languageData: extractLanguageData(user.githubProfile.repositories.nodes),
-          contributionStats: extractContributionStats(user.githubProfile.contributionsCollection.contributionCalendar, user.githubProfile.pullRequests.totalCount),
+          repositoriesCount: repositories.totalCount,
+          totalContributions: contributionsCollection.contributionCalendar.totalContributions,
+          longestStreak: calculateLongestStreak(contributionsCollection.contributionCalendar),
+          languageData: extractLanguageData(repositories.nodes),
+          contributionStats: extractContributionStats(contributionsCollection.contributionCalendar, pullRequests.totalCount),
 
-          repositories: user.githubProfile?.repositories?.nodes || [],
+          repositories: repositories.nodes || [],
         }
       : null,
   };

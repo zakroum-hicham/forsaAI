@@ -15,6 +15,13 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+const data = [
+          { key: 'emailNewApplications', label: 'Email me when new applications are received', desc: 'Get notified immediately when candidates apply to your jobs' },
+          { key: 'emailJobUpdates', label: 'Email me about job posting updates', desc: 'Notifications about job status changes and expiration reminders' },
+          { key: 'pushNotifications', label: 'Enable push notifications', desc: 'Receive browser notifications for important updates' },
+          { key: 'weeklyReport', label: 'Weekly activity report', desc: 'Get a summary of your hiring activity every Monday' }
+        ]
+
 const SettingsPage = () => {
   const [activeSection, setActiveSection] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
@@ -31,10 +38,10 @@ const SettingsPage = () => {
 
   // Notification preferences
   const [notifications, setNotifications] = useState({
-    emailNewApplications: true,
-    emailJobUpdates: false,
-    pushNotifications: true,
-    weeklyReport: true
+    "emailNewApplications": true,
+    "emailJobUpdates": false,
+    "pushNotifications": true,
+    "weeklyReport": true
   });
 
   // Security settings
@@ -57,7 +64,7 @@ const SettingsPage = () => {
     setIsEditing(false);
   };
 
-  const handleNotificationChange = (key) => {
+  const handleNotificationChange = (key: keyof typeof notifications) => {
     setNotifications(prev => ({
       ...prev,
       [key]: !prev[key]
@@ -203,26 +210,21 @@ const SettingsPage = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-xl font-semibold text-gray-900">Notification Preferences</h2>
-        <p className="text-gray-600 text-sm">Choose what notifications you'd like to receive</p>
+        <p className="text-gray-600 text-sm">Choose what notifications you&apos;d like to receive</p>
       </div>
 
       <div className="bg-gray-50 rounded-lg p-6 space-y-4">
-        {[
-          { key: 'emailNewApplications', label: 'Email me when new applications are received', desc: 'Get notified immediately when candidates apply to your jobs' },
-          { key: 'emailJobUpdates', label: 'Email me about job posting updates', desc: 'Notifications about job status changes and expiration reminders' },
-          { key: 'pushNotifications', label: 'Enable push notifications', desc: 'Receive browser notifications for important updates' },
-          { key: 'weeklyReport', label: 'Weekly activity report', desc: 'Get a summary of your hiring activity every Monday' }
-        ].map((item) => (
+        {data.map((item) => (
           <div key={item.key} className="flex items-start space-x-3 py-3">
             <button
-              onClick={() => handleNotificationChange(item.key)}
+              onClick={() => handleNotificationChange(item.key as keyof typeof notifications)}
               className={`mt-1 w-5 h-5 rounded border-2 flex items-center justify-center ${
-                notifications[item.key] 
+                notifications[item.key as keyof typeof notifications] 
                   ? 'bg-blue-600 border-blue-600 text-white' 
                   : 'border-gray-300 bg-white'
               }`}
             >
-              {notifications[item.key] && <Check className="w-3 h-3" />}
+              {notifications[item.key as keyof typeof notifications] && <Check className="w-3 h-3" />}
             </button>
             <div>
               <p className="font-medium text-gray-900">{item.label}</p>

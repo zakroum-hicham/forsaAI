@@ -1,8 +1,9 @@
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import Candidates from './Candidates';
+import { CandidateAnalyticsData } from '@/lib/applicationAnalytics/services';
 
 
-const Overview = ({topCandidates}) => {
+const Overview = ({topCandidates}:{topCandidates : CandidateAnalyticsData[]}) => {
     const statusData = [
     { name: 'Under Review', value: 45, color: '#3B82F6' },
     { name: 'Interview', value: 25, color: '#10B981' },

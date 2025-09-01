@@ -1,7 +1,8 @@
+"use client"
 import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from "@/lib/auth";
 import { redirect } from 'next/navigation';
 import { Plus, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,9 +19,8 @@ import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton';
 
 // Data Services
 import { getDashboardData } from '@/lib/dashboard/dashboard-services';
+import { DashboardFilters } from '@/types/dashboard';
 
-// Types
-import type { DashboardFilters } from '@/types/dashboard';
 
 // export const metadata: Metadata = {
 //   title: 'Recruiter Dashboard | ForsaAI',
@@ -32,7 +32,7 @@ import type { DashboardFilters } from '@/types/dashboard';
 
 export default async function DashboardPage() {
   // Check authentication
-  const session = await getServerSession(authOptions);
+  const session : SessionType = await getServerSession(authOptions);
   if (!session?.user?.id) {
     redirect('/login');
   }
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
         {/* Welcome Section */}
         <div className="space-y-2 py-4">
           <h2 className="text-2xl font-bold text-foreground">Welcome back, {session?.user?.name} ! 👋</h2>
-          <p className="text-muted-foreground">Here's what's happening with your recruitment activities today.</p>
+          <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your recruitment activities today.</p>
         </div>
       </div>
     </div>
@@ -85,15 +85,19 @@ export default async function DashboardPage() {
               </div>
               <Suspense fallback={<DashboardSkeleton.JobList />}>
                 <JobList
-                  jobs={dashboardData.jobs.filter(job => job.status === 'ACTIVE')}
-                  filters={{
-                    jobStatus: 'active',
-                    jobType: 'all',
-                    dateRange: '30d',
-                    sortBy: 'urgency',
-                    sortOrder: 'desc',
-                  }}
-                  // onFiltersChange={() => {}}
+                    jobs={dashboardData.jobs.filter(job => job.status === 'ACTIVE')}
+                    filters={{
+                      jobStatus: 'active',
+                      jobType: 'all',
+                      dateRange: '30d',
+                      sortBy: 'urgency',
+                      sortOrder: 'desc',
+                    }} 
+                    onFiltersChange={function (filters: Partial<DashboardFilters>): void {
+                      throw new Error('Function not implemented.');
+                    } } onJobSelect={function (jobId: string): void {
+                      throw new Error('Function not implemented.');
+                    } }                  // onFiltersChange={() => {}}
                   // onJobSelect={(jobId) => console.log('Selected job:', jobId)}
                 />
               </Suspense>

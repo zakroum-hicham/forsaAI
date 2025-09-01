@@ -2,10 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { JobCreateSchema } from '@/lib/validations/job'
 
+interface RouteContext {
+  params: {
+    id: string; // The dynamic segment is typed as a string.
+  };
+}
+
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const body = await req.json()
     const validation = JobCreateSchema.safeParse(body)
@@ -33,10 +40,10 @@ export async function PUT(
     } = validation.data
 
     const job = await prisma.job.update({
-      where: { id: params.id },
+      where: { id: id },
       data: {
         title: jobTitle,
-        type: jobType as any,
+        type: jobType,
         location,
         salaryMin: salaryMin ? parseFloat(salaryMin) : null,
         salaryMax: salaryMax ? parseFloat(salaryMax) : null,
@@ -46,7 +53,7 @@ export async function PUT(
         endDate: endDate ? new Date(endDate) : null,
         description: jobDescription,
         requirements,
-        status: status as any,
+        status: status,
       },
     })
 
@@ -62,11 +69,12 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  {  params }: {  params: { id: string } }
+{ params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const job = await prisma.job.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     })
 
     if (!job) {
@@ -74,7 +82,7 @@ export async function DELETE(
     }
 
     await prisma.job.delete({
-      where: { id: params.id },
+      where: { id: id },
     })
     return NextResponse.json(
       { message: 'Job deleted successfully' },

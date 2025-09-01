@@ -1,13 +1,8 @@
+import { StepPropsType } from "@/app/public/jobs/[id]/apply/JobApply";
 import { Mail, MapPin, Phone } from "lucide-react";
 
-type Props = {
-  formData: any;
-  updateFormData: (field: string, value: any) => void;
-  errors: string[];
-  isNavigating: boolean;
-};
 
-const PersonalInfoStep = ({ formData, updateFormData, errors, isNavigating }: Props) => {
+const PersonalInfoStep = ({ formData, updateFormData, errors, isNavigating } : StepPropsType) => {
   const cities = [
     "Casablanca", "Rabat", "Marrakech", "Fes", "Tangier", "Agadir", 
     "Meknes", "Oujda", "Kenitra", "Tetouan", "Safi", "Mohammedia", 

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { use } from 'react'
 
 
-export default function LoginPage({ params }: any) { 
+export default function LoginPage({ params } : { params: Promise<{id: string}> }) { 
   const { id } : { id: string } = use(params)
 
   const handleLogin = async () => {

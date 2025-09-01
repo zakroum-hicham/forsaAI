@@ -1,11 +1,11 @@
 import { getServerSession } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from "@/lib/auth";
 import { JobCreateSchema } from '@/lib/validations/job'
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions)
+    const session : SessionType = await getServerSession(authOptions)
     if (!session || !session.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -43,24 +43,21 @@ export async function POST(req: NextRequest) {
       status 
     } = validation.data
 
-    // Get or create default company
-    let company = user.company ? user.company : `${user.firstName} ${user.lastName}'s Company`;
-  
 
     const job = await prisma.job.create({
       data: {
         title: jobTitle,
-        type: jobType as any,
+        type: jobType,
         location: location,
-        salaryMin: 1,
-        salaryMax: 1,
+        salaryMin: parseInt(salaryMin || '') || null,
+        salaryMax: parseInt(salaryMax || '') || null,
         postingDate: new Date(postingDate),
         endPostingDate: endPostingDate ? new Date(endPostingDate) : null,
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
         description: jobDescription,
         requirements,
-        status: status as any,
+        status: status,
         userId: user.id,
         // company: company,
       }
@@ -77,7 +74,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session : SessionType = await getServerSession(authOptions);
 
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

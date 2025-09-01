@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const parsed = registerSchema.parse(body)
 
-    const { firstName, lastName, email, password, company, acceptTerms, acceptMarketing, confirmPassword } = parsed
+    const { firstName, lastName, email, password, company } = parsed
 
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({
@@ -38,8 +38,8 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ errors: error.flatten().fieldErrors });
+      return NextResponse.json(error, { status: 400 });
     }
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
